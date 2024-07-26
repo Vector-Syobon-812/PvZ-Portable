@@ -3,7 +3,7 @@
 #define NOMINMAX 1
 #include <windows.h>
 #include "ImageLib.h"
-#include "png/png.h"
+#include "png.h"
 #include <math.h>
 #include <tchar.h>
 #include "paklib/PakInterface.h"
@@ -11,8 +11,8 @@
 
 extern "C"
 {
-#include "jpeg/jpeglib.h"
-#include "jpeg/jerror.h"
+#include "jpeglib.h"
+#include "jerror.h"
 }
 
 using namespace ImageLib;
