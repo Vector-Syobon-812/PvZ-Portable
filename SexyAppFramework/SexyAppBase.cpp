@@ -25,10 +25,9 @@
 #include "misc/HTTPTransfer.h"
 #include "widget/Dialog.h"
 #include "imagelib/ImageLib.h"
-#include "sound/DSoundManager.h"
-#include "sound/DSoundInstance.h"
+#include "sound/SDLSoundManager.h"
+#include "sound/SDLSoundInstance.h"
 #include "misc/Rect.h"
-#include "sound/FModMusicInterface.h"
 #include "misc/PropertiesParser.h"
 #include "misc/PerfTimer.h"
 #include "misc/MTRand.h"
@@ -52,9 +51,9 @@ SexyAppBase* Sexy::gSexyAppBase = NULL;
 
 SEHCatcher Sexy::gSEHCatcher;
 
-HMODULE gDDrawDLL = NULL;
-HMODULE gDSoundDLL = NULL;
-HMODULE gVersionDLL = NULL;
+//HMODULE gDDrawDLL = NULL;
+//HMODULE gDSoundDLL = NULL;
+//HMODULE gVersionDLL = NULL;
 
 //typedef struct { UINT cbSize; DWORD dwTime; } LASTINPUTINFO;
 typedef BOOL (WINAPI*GetLastInputInfoFunc)(LASTINPUTINFO *plii);
@@ -141,10 +140,10 @@ SexyAppBase::SexyAppBase()
 {
 	gSexyAppBase = this;
 
-	gVersionDLL = LoadLibraryA("version.dll");
-	gDDrawDLL = LoadLibraryA("ddraw.dll");
-	gDSoundDLL = LoadLibraryA("dsound.dll");
-	gGetLastInputInfoFunc = (GetLastInputInfoFunc) GetProcAddress(GetModuleHandleA("user32.dll"),"GetLastInputInfo");
+	//gVersionDLL = LoadLibraryA("version.dll");
+	//gDDrawDLL = LoadLibraryA("ddraw.dll");
+	//gDSoundDLL = LoadLibraryA("dsound.dll");
+	//gGetLastInputInfoFunc = (GetLastInputInfoFunc) GetProcAddress(GetModuleHandleA("user32.dll"),"GetLastInputInfo");
 
 	//ImageLib::InitJPEG2000();
 
@@ -158,10 +157,10 @@ SexyAppBase::SexyAppBase()
 #endif
 
 	// Extract product version
-	char aPath[_MAX_PATH];
-	GetModuleFileNameA(NULL, aPath, 256);
-	mProductVersion = GetProductVersion(aPath);	
-	mChangeDirTo = GetFileDir(aPath);
+	//char aPath[_MAX_PATH];
+	//GetModuleFileNameA(NULL, aPath, 256);
+	//mProductVersion = GetProductVersion(aPath);	
+	//mChangeDirTo = GetFileDir(aPath);
 
 	mNoDefer = false;	
 	mFullScreenPageFlip = true; // should we page flip in fullscreen?
@@ -494,9 +493,11 @@ SexyAppBase::~SexyAppBase()
 	if (mMutex != NULL)
 		::CloseHandle(mMutex);	
 
+	/*
 	FreeLibrary(gDDrawDLL);
 	FreeLibrary(gDSoundDLL);
 	FreeLibrary(gVersionDLL);
+	*/
 }
 
 static BOOL CALLBACK ChangeDisplayWindowEnumProc(HWND hwnd, LPARAM lParam)
@@ -1090,7 +1091,9 @@ bool SexyAppBase::OpenURL(const std::string& theURL, bool shutdownOnOpen)
 }
 
 std::string SexyAppBase::GetProductVersion(const std::string& thePath)
-{	
+{
+	return "0";
+	/*
 	// Dynamically Load Version.dll
 	typedef DWORD (APIENTRY *GetFileVersionInfoSizeFunc)(LPSTR lptstrFilename, LPDWORD lpdwHandle);
 	typedef BOOL (APIENTRY *GetFileVersionInfoFunc)(LPSTR lptstrFilename, DWORD dwHandle, DWORD dwLen, LPVOID lpData);
@@ -1135,6 +1138,7 @@ std::string SexyAppBase::GetProductVersion(const std::string& thePath)
 	}
 
 	return aProductVersion;
+	*/
 }
 
 void SexyAppBase::WaitForLoadingThread()
@@ -6214,9 +6218,7 @@ MusicInterface* SexyAppBase::CreateMusicInterface()
 {
 	if (mNoSoundNeeded)
 		return new DummyMusicInterface();
-	else if (mWantFMod)
-		return new FModMusicInterface();
-	else 
+	else
 		return new BassMusicInterface(mInvisHWnd);
 }
 
@@ -6235,6 +6237,7 @@ void SexyAppBase::Init()
 	if (mShutdown)
 		return;
 
+	/*
 	if (gDDrawDLL==NULL || gDSoundDLL==NULL)
 	{
 		MessageBox(NULL, 
@@ -6243,6 +6246,7 @@ void SexyAppBase::Init()
 						MB_OK | MB_ICONERROR);
 		DoExit(0);
 	}
+	*/
 
 	InitPropertiesHook();
 	ReadFromRegistry();	
@@ -6435,7 +6439,7 @@ void SexyAppBase::Init()
 	}
 
 	if (mSoundManager == NULL)		
-		mSoundManager = new DSoundManager(mNoSoundNeeded?NULL:mHWnd, mWantFMod);
+		mSoundManager = new SDLSoundManager();
 
 	SetSfxVolume(mSfxVolume);
 	
