@@ -23,6 +23,7 @@ static void CheckBassFunction(unsigned int theFunc, const char *theName)
 ///////////////////////////////////////////////////////////////////////////////
 BASS_INSTANCE::BASS_INSTANCE(const char *dllName)
 {
+	// TODO: Linux dlopen(), dlclose(), dlsym()
     mModule = LoadLibrary(dllName);
 	if (!mModule)
 		return;
