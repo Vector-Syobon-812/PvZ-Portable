@@ -376,7 +376,7 @@ protected:
 
 	// Registry helpers
 	bool					RegistryRead(const std::string& theValueName, ulong* theType, uchar* theValue, ulong* theLength);
-	bool					RegistryReadKey(const std::string& theValueName, ulong* theType, uchar* theValue, ulong* theLength, HKEY theMainKey = HKEY_CURRENT_USER);
+	bool					RegistryReadKey(const std::string& theValueName, ulong* theType, uchar* theValue, ulong* theLength);
 	bool					RegistryWrite(const std::string& theValueName, ulong theType, const uchar* theValue, ulong theLength);
 
 	// Demo recording helpers	
@@ -400,8 +400,8 @@ public:
 	// Public methods
 	virtual void			BeginPopup();
 	virtual void			EndPopup();
-	virtual int				MsgBox(const std::string &theText, const std::string &theTitle = "Message", int theFlags = MB_OK);
-	virtual int				MsgBox(const std::wstring &theText, const std::wstring &theTitle = L"Message", int theFlags = MB_OK);
+	virtual int				MsgBox(const std::string &theText, const std::string &theTitle = "Message", int theFlags = 0);
+	virtual int				MsgBox(const std::wstring &theText, const std::wstring &theTitle = L"Message", int theFlags = 0);
 	virtual void			Popup(const std::string& theString);
 	virtual void			Popup(const std::wstring& theString);
 	virtual void			LogScreenSaverError(const std::string &theError);
@@ -496,9 +496,8 @@ public:
 	virtual void			DialogButtonDepress(int theDialogId, int theButtonId);
 
 	virtual void			GotFocus();
-	virtual void			LostFocus();	
-	virtual bool			IsAltKeyUsed(WPARAM wParam);
-	virtual bool			DebugKeyDown(int theKey);	
+	virtual void			LostFocus();
+	virtual bool			DebugKeyDown(int theKey);
 //	virtual bool			DebugKeyDownAsync(int theKey, bool ctrlDown, bool altDown);
 	virtual void			CloseRequestAsync();
 	bool					Is3DAccelerated();
@@ -583,7 +582,6 @@ public:
 	void					ClearUpdateBacklog(bool relaxForASecond = false);
 	bool					IsScreenSaver();
 	virtual bool			AppCanRestore();
-	static LRESULT CALLBACK	WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);		
 };
 
 extern SexyAppBase* gSexyAppBase;
