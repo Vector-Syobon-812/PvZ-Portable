@@ -214,7 +214,7 @@ MemoryImage* ReanimatorCache::MakeCachedPlantFrame(SeedType theSeedType, DrawVar
 	else if (theSeedType == SeedType::SEED_EXPLODE_O_NUT)
 	{
 		aMemoryGraphics.SetColorizeImages(true);
-		aMemoryGraphics.SetColor(Color(255, 64, 64));
+		aMemoryGraphics.SetColor(Color(64, 64, 255));
 		DrawReanimatorFrame(&aMemoryGraphics, -aOffsetX, -aOffsetY, aPlantDef.mReanimationType, "anim_idle", theDrawVariation);
 	}
 	else
