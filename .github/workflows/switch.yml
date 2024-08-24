@@ -11,6 +11,7 @@ jobs:
 
       - name: Run CMake and compile
         run: |
+          sudo apt install -y libopenmpt-dev libmpg123-dev libvorbis-dev libogg-dev
           source $DEVKITPRO/switchvars.sh
           mkdir build
           cd build
