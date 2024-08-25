@@ -98,16 +98,16 @@ bool PakInterface::AddPakFile(const std::string& theFileName)
 	if (aFP == NULL)
 		return false;
 
-	ulong aMagic = 0;
-	FRead(&aMagic, sizeof(ulong), 1, aFP);
+	uint32_t aMagic = 0;
+	FRead(&aMagic, sizeof(uint32_t), 1, aFP);
 	if (aMagic != 0xBAC04AC0)
 	{
 		FClose(aFP);
 		return false;
 	}
 
-	ulong aVersion = 0;
-	FRead(&aVersion, sizeof(ulong), 1, aFP);
+	uint32_t aVersion = 0;
+	FRead(&aVersion, sizeof(uint32_t), 1, aFP);
 	if (aVersion > 0)
 	{
 		FClose(aFP);
@@ -132,6 +132,12 @@ bool PakInterface::AddPakFile(const std::string& theFileName)
 		FRead(&aSrcSize, sizeof(int), 1, aFP);
 		int64_t aFileTime;
 		FRead(&aFileTime, sizeof(int64_t), 1, aFP);
+
+		for (int i=0; i<aNameWidth; i++)
+		{
+			if (aName[i] == '\\')
+				aName[i] = '/'; // lol
+		}
 
 		PakRecordMap::iterator aRecordItr = mPakRecordMap.insert(PakRecordMap::value_type(StringToUpper(aName), PakRecord())).first;
 		PakRecord* aPakRecord = &(aRecordItr->second);
@@ -229,6 +235,16 @@ PFILE* PakInterface::FOpen(const char* theFileName, const char* anAccess)
 			aPFP->mFP = NULL;
 			return aPFP;
 		}
+
+		anItr = mPakRecordMap.find(theFileName);
+		if (anItr != mPakRecordMap.end())
+		{
+			PFILE* aPFP = new PFILE;
+			aPFP->mRecord = &anItr->second;
+			aPFP->mPos = 0;
+			aPFP->mFP = NULL;
+			return aPFP;
+		}
 	}
 
 	FILE* aFP = fcaseopen(theFileName, anAccess);
@@ -290,8 +306,7 @@ size_t PakInterface::FRead(void* thePtr, int theElemSize, int theCount, PFILE* t
 		// 取得在整个 pak 中开始读取的位置的指针
 		uchar* src = (uchar*) theFile->mRecord->mCollection->mDataPtr + theFile->mRecord->mStartPos + theFile->mPos;
 		uchar* dest = (uchar*) thePtr;
-		for (int i = 0; i < aSizeBytes; i++)
-			*(dest++) = (*src++) ^ 0xF7; // 'Decrypt'
+		memcpy(dest, src, aSizeBytes);
 		theFile->mPos += aSizeBytes;  // 读取完成后，移动当前读取位置的指针
 		return aSizeBytes / theElemSize;  // 返回实际读取的项数
 	}
@@ -307,7 +322,7 @@ int PakInterface::FGetC(PFILE* theFile)
 		{
 			if (theFile->mPos >= theFile->mRecord->mSize)
 				return EOF;		
-			char aChar = *((char*) theFile->mRecord->mCollection->mDataPtr + theFile->mRecord->mStartPos + theFile->mPos++) ^ 0xF7;
+			char aChar = *((char*) theFile->mRecord->mCollection->mDataPtr + theFile->mRecord->mStartPos + theFile->mPos++);
 			if (aChar != '\r')
 				return (uchar) aChar;
 		}
@@ -341,7 +356,7 @@ char* PakInterface::FGetS(char* thePtr, int theSize, PFILE* theFile)
 					return NULL;
 				break;
 			}
-			char aChar = *((char*) theFile->mRecord->mCollection->mDataPtr + theFile->mRecord->mStartPos + theFile->mPos++) ^ 0xF7;
+			char aChar = *((char*) theFile->mRecord->mCollection->mDataPtr + theFile->mRecord->mStartPos + theFile->mPos++);
 			if (aChar != '\r')
 				thePtr[anIdx++] = aChar;
 			if (aChar == '\n')

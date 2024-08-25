@@ -5071,9 +5071,7 @@ void SexyAppBase::Init()
 	strcat(aPath, "/savedata/");
 	SetAppDataFolder(aPath);
 
-	/*
 	gPakInterface->AddPakFile("main.pak");
-	*/
 
 	// Create a message we can use to talk to ourselves inter-process
 	//mNotifyGameMessage = RegisterWindowMessage((__S("Notify") + StringToSexyString(mProdName)).c_str());

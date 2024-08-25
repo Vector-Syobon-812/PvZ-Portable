@@ -59,7 +59,7 @@ bool SDLSoundManager::LoadAUSound(unsigned int theSfxID, const std::string& theF
 {
 	PFILE* fp;
 
-	fp = p_fopen(theFilename.c_str(), "rb");	
+	fp = p_fopen(theFilename.c_str(), "rb");
 
 	if (fp == NULL)
 		return false;	
@@ -243,7 +243,21 @@ bool SDLSoundManager::LoadSound(unsigned int theSfxID, const std::string& theFil
 	for (int i=0; i<3; i++)
 	{
 		std::string aFilename = theFilename + formats[i];
-		mSourceSounds[theSfxID] = Mix_LoadWAV(aFilename.c_str());
+
+		PFILE *fp = p_fopen(aFilename.c_str(), "rb");
+		if (!fp)
+			continue;
+
+		p_fseek(fp, 0, SEEK_END);
+		size_t fileSize = p_ftell(fp);
+		p_fseek(fp, 0, SEEK_SET);
+		uint8_t *data = new uint8_t[fileSize];
+		p_fread(data, 1, fileSize, fp);
+		p_fclose(fp);
+
+		mSourceSounds[theSfxID] = Mix_LoadWAV_RW(SDL_RWFromConstMem(data, fileSize), 1);
+		delete[] data;
+
 		if (mSourceSounds[theSfxID]) break;
 	}
 
