@@ -13,28 +13,26 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW32
+          msystem: mingw32
           update: true
-          install: >-
-            git
-            make
-            mingw-w64-i686-zlib
-            mingw-w64-i686-gcc
-            mingw-w64-i686-SDL2
-            mingw-w64-i686-glew
-            mingw-w64-i686-libopenmpt
-            mingw-w64-i686-mpg123
-            mingw-w64-i686-libvorbis
-            mingw-w64-i686-libogg
-            mingw-w64-i686-libjpeg-turbo
-            mingw-w64-i686-libpng
+          pacboy: >-
+            toolchain:p
+            cmake:p
+            ninja:p
+            zlib:p
+            SDL2:p
+            glew:p
+            libopenmpt:p
+            mpg123:p
+            libvorbis:p
+            libogg:p
+            libjpeg-turbo:p
+            libpng:p
 
-      - name: Install dependencies and compile
+      - name: Compile
         run: |
-          mkdir build
-          cd build
-          cmake .. -G "Unix Makefiles"
-          make
+          cmake -G Ninja -B build
+          cmake --build build
 
       - name: Upload .exe artifact
         uses: actions/upload-artifact@v4
