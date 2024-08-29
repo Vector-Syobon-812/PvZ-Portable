@@ -54,11 +54,8 @@ TitleScreen::~TitleScreen()
 	}
 
 	// free memory used by title screen since we won't see it again
-	// (this is a garbage way of going about it but i don't see another way)
-	_Font* font = FONT_BRIANNETOD16->Duplicate();
 	mApp->mResourceManager->DeleteResources("LoaderBar");
-	FONT_BRIANNETOD16 = font;
-	((ImageFont*)font)->mFontData->DeRef();
+	FONT_BRIANNETOD16 = mApp->mResourceManager->LoadFont("FONT_BRIANNETOD16");
 }
 
 void TitleScreen::DrawToPreload(Graphics* g)
