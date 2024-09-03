@@ -81,6 +81,8 @@ void TodAssertFailed(const char* theCondition, const char* theFile, int theLine,
 	}
 	TodTrace("%s", aBuffer);
 
+	TodErrorMessageBox(aBuffer, "Assertion failed");
+
 	exit(0);
 }
 
