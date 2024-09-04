@@ -10,10 +10,10 @@ Fork of Patoke's PVZ GOTY decompilation with the following objectives:
 - [x] Optimize memory usage for console ports (Partial)
 * Port the game to some videogame consoles:
 
-| Console         | Notes                                                                                                                                      |
-|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| Nintendo Switch | Works on yuzu (after compiling all definitions). Ryujinx crashes on boot. Real hardware works but has problems with textures after a while |
-| Nintendo 3DS    | In development, might not have enough memory for Old 3DS, might barely work on New 3DS                                                     |
+| Console         | Data path                    | Notes                                                                                                                                      |
+|-----------------|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| Nintendo Switch | sdmc:/switch/PlantsvsZombies | Works on yuzu (after compiling all definitions). Ryujinx crashes on boot. Real hardware works but has problems with textures after a while |
+| Nintendo 3DS    | sdmc:/3ds/PlantsvsZombies    | In development, might not have enough memory for Old 3DS, might barely work on New 3DS (Crashes during title screen loading)               |
 
 Original README continues below
 
