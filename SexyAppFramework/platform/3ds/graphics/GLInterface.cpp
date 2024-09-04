@@ -11,7 +11,7 @@
 #include "colored_shbin.h"
 #include "textured_shbin.h"
 
-#define MAX_VERTICES 16384
+#define MAX_VERTICES 2048
 #define GetColorFromTriVertex(theVertex, theColor) (theVertex.color?theVertex.color:theColor)
 
 #define DISPLAY_TRANSFER_FLAGS \
@@ -27,7 +27,7 @@ static int gMaxTextureWidth;
 static int gMaxTextureHeight;
 static int gSupportedPixelFormats;
 static bool gTextureSizeMustBePow2;
-static const int MAX_TEXTURE_SIZE = 1024;
+static const int MAX_TEXTURE_SIZE = 512;
 static bool gLinearFilter = false;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,6 +45,7 @@ static Shader shaders[2];
 static C3D_RenderTarget* bottomTarget;
 
 static GLVertex* gVertices;
+static int gStartVertex;
 static int gNumVertices;
 static int gVertexMode;
 
@@ -58,7 +59,8 @@ static void GfxEnd()
 {
 	if (gVertexMode == -1) return;
 
-	C3D_DrawArrays((GPU_Primitive_t)gVertexMode, 0, gNumVertices);
+	C3D_DrawArrays((GPU_Primitive_t)gVertexMode, gStartVertex, gNumVertices);
+	gStartVertex += gNumVertices;
 
 	gVertexMode = -1;
 	gNumVertices = 0;
@@ -68,14 +70,14 @@ static void GfxAddVertices(const GLVertex *arr, int arrCount)
 {
 	if (gVertexMode == -1) return;
 
-	if (gNumVertices + arrCount >= MAX_VERTICES)
+	if (gStartVertex + gNumVertices + arrCount >= MAX_VERTICES)
 	{
 		int oldMode = gVertexMode;
 		GfxEnd();
 		GfxBegin(oldMode);
 	}
 	
-	for (int i=gNumVertices; i<gNumVertices + arrCount; i++)
+	for (int i=gStartVertex + gNumVertices; i<gStartVertex + gNumVertices + arrCount; i++)
 	{
 		gVertices[i] = arr[i];
 	}
@@ -86,14 +88,14 @@ static void GfxAddVertices(VertexList &arr)
 {
 	if (gVertexMode == -1) return;
 
-	if (gNumVertices + arr.size() >= MAX_VERTICES)
+	if (gStartVertex + gNumVertices + arr.size() >= MAX_VERTICES)
 	{
 		int oldMode = gVertexMode;
 		GfxEnd();
 		GfxBegin(oldMode);
 	}
 
-	for (int i=gNumVertices; i<gNumVertices + arr.size(); i++)
+	for (int i=gStartVertex + gNumVertices; i<gStartVertex + gNumVertices + arr.size(); i++)
 	{
 		gVertices[i] = arr[i];
 	}
@@ -104,7 +106,7 @@ static void GfxAddVertices(const TriVertex arr[][3], int arrCount, unsigned int 
 {
 	if (gVertexMode == -1) return;
 
-	if (gNumVertices + arrCount*3 >= MAX_VERTICES)
+	if (gStartVertex + gNumVertices + arrCount*3 >= MAX_VERTICES)
 	{
 		int oldMode = gVertexMode;
 		GfxEnd();
@@ -117,18 +119,18 @@ static void GfxAddVertices(const TriVertex arr[][3], int arrCount, unsigned int 
 
 		for (int i = 0; i < 3; i++)
 		{
-			gVertices[gNumVertices+i].sx = aTriVerts[i].x + tx;
-			gVertices[gNumVertices+i].sy = aTriVerts[i].y + ty;
-			gVertices[gNumVertices+i].color = GetColorFromTriVertex(aTriVerts[i], theColor);
-			gVertices[gNumVertices+i].tu = aTriVerts[i].u * aMaxTotalU;
-			gVertices[gNumVertices+i].tv = aTriVerts[i].v * aMaxTotalV;
+			gVertices[gStartVertex+gNumVertices+i].sx = aTriVerts[i].x + tx;
+			gVertices[gStartVertex+gNumVertices+i].sy = aTriVerts[i].y + ty;
+			gVertices[gStartVertex+gNumVertices+i].color = GetColorFromTriVertex(aTriVerts[i], theColor);
+			gVertices[gStartVertex+gNumVertices+i].tu = aTriVerts[i].u * aMaxTotalU;
+			gVertices[gStartVertex+gNumVertices+i].tv = aTriVerts[i].v * aMaxTotalV;
 		}
 
 		gNumVertices += 3;
 	}
 }
 
-static void SetTexture(C3D_Tex *theTex)
+static void SetTexture(C3D_Tex *theTex, bool force=false)
 {
 	Shader* oldShader = currShader;
 
@@ -140,7 +142,7 @@ static void SetTexture(C3D_Tex *theTex)
 		C3D_TexBind(0, theTex);
 	}
 
-	if (oldShader != currShader)
+	if (force || oldShader != currShader)
 	{
 		C3D_BindProgram(&currShader->program);
 
@@ -218,7 +220,7 @@ static void ToMortonTexture32(C3D_Tex* tex, u32* dst, u32* src, int originX, int
 			u8 g = (pixel >> 8) & 0xff;
 			u8 b = (pixel >> 16) & 0xff;
 			u8 a = (pixel >> 24) & 0xff;
-			pixel = (a<<0) | (b<<8) | (g<<16) | (r<<24);
+			pixel = (a<<0) | (r<<8) | (g<<16) | (b<<24);
 
 			dst[(mortonX | mortonY) + (tileX * 8) + (tileY * tex->width)] = pixel;
 		}
@@ -248,7 +250,7 @@ static void ToMortonTexture16(C3D_Tex* tex, u16* dst, u16* src, int originX, int
 			u8 g = (pixel >> 4) & 0xff;
 			u8 b = (pixel >> 8) & 0xff;
 			u8 a = (pixel >> 12) & 0xff;
-			pixel = (a<<0) | (b<<4) | (g<<8) | (r<<12);
+			pixel = (a<<0) | (r<<4) | (g<<8) | (b<<12);
 
 			dst[(mortonX | mortonY) + (tileX * 8) + (tileY * tex->width)] = pixel;
 		}
@@ -850,7 +852,7 @@ void TextureData::CheckCreateTextures(MemoryImage *theImage)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-C3D_Tex& TextureData::GetTexture(int x, int y, int &width, int &height, float &u1, float &v1, float &u2, float &v2)
+C3D_Tex* TextureData::GetTexture(int x, int y, int &width, int &height, float &u1, float &v1, float &u2, float &v2)
 {
 	int tx = x/mTexPieceWidth;
 	int ty = y/mTexPieceHeight;
@@ -876,12 +878,12 @@ C3D_Tex& TextureData::GetTexture(int x, int y, int &width, int &height, float &u
 	u2 = (float)right/aPiece.mWidth;
 	v2 = (float)bottom/aPiece.mHeight;
 
-	return aPiece.mTexture;
+	return &aPiece.mTexture;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-C3D_Tex& TextureData::GetTextureF(float x, float y, float &width, float &height, float &u1, float &v1, float &u2, float &v2)
+C3D_Tex* TextureData::GetTextureF(float x, float y, float &width, float &height, float &u1, float &v1, float &u2, float &v2)
 {
 	int tx = x/mTexPieceWidth;
 	int ty = y/mTexPieceHeight;
@@ -907,7 +909,7 @@ C3D_Tex& TextureData::GetTextureF(float x, float y, float &width, float &height,
 	u2 = (float)right/aPiece.mWidth;
 	v2 = (float)bottom/aPiece.mHeight;
 
-	return aPiece.mTexture;
+	return &aPiece.mTexture;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -949,7 +951,7 @@ void TextureData::Blt(float theX, float theY, const Rect& theSrcRect, const Colo
 		{
 			aWidth = srcRight-srcX;
 			aHeight = srcBottom-srcY;
-			C3D_Tex& aTexture = GetTexture(srcX, srcY, aWidth, aHeight, u1, v1, u2, v2);
+			C3D_Tex* aTexture = GetTexture(srcX, srcY, aWidth, aHeight, u1, v1, u2, v2);
 
 			float x = dstX - 0.5f;
 			float y = dstY - 0.5f;
@@ -961,7 +963,7 @@ void TextureData::Blt(float theX, float theY, const Rect& theSrcRect, const Colo
 				{ {x+aWidth}, {y+aHeight}, {0},{aColor},{u2},{v2} }
 			};
 
-			SetTexture(&aTexture);
+			SetTexture(aTexture);
 
 			GfxBegin(GPU_TRIANGLE_STRIP);
 			GfxAddVertices(aVertex, 4);
@@ -1139,7 +1141,7 @@ void TextureData::BltTransformed(const SexyMatrix3 &theTrans, const Rect& theSrc
 		{
 			aWidth = srcRight-srcX;
 			aHeight = srcBottom-srcY;
-			C3D_Tex& aTexture = GetTexture(srcX, srcY, aWidth, aHeight, u1, v1, u2, v2);
+			C3D_Tex* aTexture = GetTexture(srcX, srcY, aWidth, aHeight, u1, v1, u2, v2);
 
 			float x = dstX; // - 0.5f;
 			float y = dstY; // - 0.5f;
@@ -1179,7 +1181,7 @@ void TextureData::BltTransformed(const SexyMatrix3 &theTrans, const Rect& theSrc
 				{ {tp[3].x},{tp[3].y},{0},{aColor},{u2},{v2} }
 			};
 
-			SetTexture(&aTexture);
+			SetTexture(aTexture);
 
 			if (!clipped)
 			{
@@ -1331,6 +1333,7 @@ GLInterface::GLInterface(SexyAppBase* theApp)
 
 	gVertexMode = -1;
 	gNumVertices = 0;
+	gStartVertex = 0;
 	gVertices = (GLVertex*)linearAlloc(sizeof(GLVertex) * MAX_VERTICES);
 	memset(gVertices, 0, sizeof(GLVertex) * MAX_VERTICES);
 }
@@ -1416,7 +1419,6 @@ void GLInterface::UpdateViewport()
 		viewport_height = width * 3 / 4;
 		viewport_y = (height - viewport_height) / 2;
 	}
-	//glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
 	C3D_SetViewport(viewport_x, viewport_y, viewport_width, viewport_height);
 	mPresentationRect = Rect( viewport_x, viewport_y, viewport_width, viewport_height );
 
@@ -1458,7 +1460,7 @@ int GLInterface::Init(bool IsWindowed)
 		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, shaders[i].uf_projection, &projection);
 
 	// Use untextured shader by default
-	SetTexture(0);
+	SetTexture(0, true);
 
 	gTextureSizeMustBePow2 = false;
 	gMinTextureWidth = 8;
@@ -1532,6 +1534,7 @@ void GLInterface::Flush()
 {
 	C3D_FrameEnd(0);
 	gNumVertices = 0;
+	gStartVertex = 0;
 
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 	C3D_FrameDrawOn(bottomTarget);
@@ -1555,6 +1558,7 @@ bool GLInterface::CreateImageTexture(MemoryImage *theImage)
 	TextureData *aData = (TextureData*)theImage->mD3DData;
 	aData->CheckCreateTextures(theImage);
 
+	/*
 	u32 total = 0;
 	ImageSet::iterator anItr;
 	for(anItr = mImageSet.begin(); anItr != mImageSet.end(); ++anItr)
@@ -1563,6 +1567,7 @@ bool GLInterface::CreateImageTexture(MemoryImage *theImage)
 		total += ((TextureData*)anImage->mD3DData)->mTexMemSize;
 	}
 	printf("total memory: %.2f MB, %.2f KB\n", total/1024.f/1024.f, total/1024.f);
+	*/
 
 	if (wantPurge)
 		theImage->PurgeBits();
