@@ -33,6 +33,7 @@ jobs:
         run: |
           cmake -G Ninja -B build
           cmake --build build
+          cp /mingw32/bin/SDL2.dll /mingw32/bin/glew32.dll build/
 
       - name: Upload .exe artifact
         uses: actions/upload-artifact@v4
