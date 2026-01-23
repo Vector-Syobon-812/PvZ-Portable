@@ -7059,7 +7059,7 @@ void Board::DrawZenButtons(Graphics* g)
 					g->SetColorizeImages(true);
 					g->SetColor(Color(128, 128, 128));
 				}
-				g->DrawImage(Sexy::IMAGE_REANIM_ZENGARDEN_BUGSPRAY_BOTTLE, aButtonRect.mX, aButtonRect.mY + aOffsetY - 1);
+				g->DrawImage(Sexy::IMAGE_BUG_SPRAY, aButtonRect.mX, aButtonRect.mY + aOffsetY - 1);
 				g->SetColorizeImages(false);
 
 				SexyString aChargeString = StrFormat(__S("x%d"), aCharges);
