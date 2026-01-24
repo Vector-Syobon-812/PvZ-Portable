@@ -19,7 +19,7 @@ file(GLOB SOURCES
 	Lawn/*.cpp
 	Lawn/Widget/*.cpp
 	Lawn/System/*.cpp
-	SexyAppFramework/LawnProject.rc
+	#SexyAppFramework/LawnProject.rc
 )
 
 # these files are included and must not be built in the project

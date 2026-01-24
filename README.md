@@ -16,11 +16,12 @@ This project is licensed under the **[GNU Lesser General Public License v2.1](LI
 **⚠️ Notice:**
 
 * This repository does **NOT** contain any copyrighted game assets (such as images, music, or levels) owned by PopCap Games or Electronic Arts. Users must provide their own `main.pak` and `properties/` folder from a **legally purchased copy** of Plants vs. Zombies: GOTY Edition.
-* The codebase is based on a manual reimplementation based on publicly available reverse-engineering documentation and community research (such as [植物大战僵尸吧](https://tieba.baidu.com/f?ie=utf-8&kw=%E6%A4%8D%E7%89%A9%E5%A4%A7%E6%88%98%E5%83%B5%E5%B0%B8), [PVZ Wiki](https://wiki.pvz1.com/doku.php?id=home) and [PvZ Tools](https://pvz.tools/memory/)). It is written to utilize portable backends like SDL2 and OpenGL.
+* The codebase is a manual reimplementation derived from publicly available reverse-engineering documentation and community research (such as [植物大战僵尸吧](https://tieba.baidu.com/f?ie=utf-8&kw=%E6%A4%8D%E7%89%A9%E5%A4%A7%E6%88%98%E5%83%B5%E5%B0%B8), [PVZ Wiki](https://wiki.pvz1.com/doku.php?id=home) and [PvZ Tools](https://pvz.tools/memory/)). It is written to utilize portable backends like SDL2 and OpenGL.
 * This project is intended solely for **educational purposes**, focusing on **cross-platform porting techniques**, engine modernization, and learning how classic game logic can be adapted to various hardware architectures (e.g., Nintendo Switch, 3DS).
 * Non-Commercial: This project is not affiliated with, authorized, or endorsed by PopCap Games or Electronic Arts.
 * Most of the re-implementation code of the framework is contributed by [Patoke](https://github.com/Patoke/) and [Headshotnoby](https://github.com/headshot2017/).
-* To play the game using this project you need to have access to the original game files by [purchasing it](https://www.ea.com/games/plants-vs-zombies/plants-vs-zombies)
+* Project icons and platform-specific logos are carried over from the original fork by [Headshotnoby](https://github.com/headshot2017/).
+* To play the game using this project you **MUST** have access to the original game files by purchasing it on [EA's official website](https://www.ea.com/games/plants-vs-zombies/plants-vs-zombies) or [Steam](https://store.steampowered.com/app/3590/Plants_vs_Zombies_GOTY_Edition/).
 
 ## Features
 
@@ -39,7 +40,7 @@ This is a **fork** of [Patoke](https://github.com/Patoke/re-plants-vs-zombies) a
 | Windows (SDL2)  | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
 | Linux (SDL2)    | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
 | Haiku (SDL2)    | Executable dir (resources); per-user app-data for writable files | Partially works: no music                                                              |
-| Nintendo Switch | sdmc:/switch/PlantsvsZombies | Works on real hardware and Citron. Kenji-NX crashes on boot.                           |
+| Nintendo Switch | sdmc:/switch/PlantsvsZombies | Works on real hardware. Kenji-NX crashes on boot.                           |
 | Nintendo 3DS    | sdmc:/3ds/PlantsvsZombies    | In development, might not have enough memory for Old 3DS, might barely work on New 3DS |
 | Nintendo Wii U  |                              | No work started yet, but planned                                                       |
 
@@ -80,7 +81,7 @@ You can install the required dependencies using the following command:
 sudo pacman -S --needed base-devel cmake glew libjpeg-turbo libogg libopenmpt libpng libvorbis mpg123 ninja sdl2-compat
 ```
 
-### MSYS2 (UCRT64)
+### Windows (MSYS2 UCRT64)
 
 You can install the required dependencies using the following command:
 
@@ -117,10 +118,12 @@ The framework differs from many other APIs in that some class properties are not
 
 ## Thanks
 
-- [@Headshotnoby](https://www.github.com/headshot2017) for fullly implementing the 64-bit and OpenGL backends support
-- [@Patoke](https://www.github.com/Patoke) for the amazing reimplementation of PvZ GOTY
-- [@rspforhp](https://www.github.com/octokatherine) for their amazing work decompiling the 0.9.9 version of PvZ
-- [@ruslan831](https://github.com/ruslan831) for archiving the [0.9.9 decompilation of PvZ](https://github.com/ruslan831/PlantsVsZombies-decompilation)
-- The GLFW team for their amazing work
-- PopCap for creating the amazing PvZ franchise
-- All the contributors which have worked or are actively working in this amazing project
+- **[@Headshotnoby](https://www.github.com/headshot2017)**: For fully implementing the 64-bit support and OpenGL backend.
+- **[@Patoke](https://www.github.com/Patoke)**: For the incredible initial reimplementation of PvZ GOTY.
+- **[@rspforhp](https://www.github.com/octokatherine)**: For the 0.9.9 version's work.
+- **[@ruslan831](https://github.com/ruslan831)**: For archiving the 0.9.9 version's re-implementation.
+- **The SDL Team**: For the amazing cross-platform development library that powers this port.
+- **The GLFW Team**: For their work on the windowing library used in the original re-implementation.
+- **The OpenMPT Team**: For libopenmpt, enabling high-quality MO3 music playback.
+- **PopCap Games**: For creating the amazing PvZ franchise.
+- All the contributors who have worked or are actively working in this amazing project.

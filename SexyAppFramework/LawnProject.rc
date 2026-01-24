@@ -50,7 +50,7 @@ END
 // Cursor
 //
 
-IDC_CURSOR1             CURSOR                  "../Cursor13.cur"
+// IDC_CURSOR1             CURSOR                  "../Cursor13.cur"
 
 #endif    // 中文(简体，中国) resources
 /////////////////////////////////////////////////////////////////////////////

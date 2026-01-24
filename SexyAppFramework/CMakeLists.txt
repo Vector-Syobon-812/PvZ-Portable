@@ -210,14 +210,14 @@ target_sources(${PROJECT_NAME} PRIVATE
     "SexyAppBase.h"
 
     # No group sources
-    "../Cursor13.cur"
+    # "../Cursor13.cur"
     "../LawnApp.cpp"
     "../LawnApp.h"
     "../main.cpp"
     ".gitattributes"
     ".gitignore"
     "resource.h"
-    "LawnProject.rc"
+    # "LawnProject.rc"
 )
 
 use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")
