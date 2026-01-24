@@ -101,6 +101,22 @@ cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
+### Configuration Options
+
+You can customize the game features by adding options to the first `cmake` command:
+
+| Option | Default | Description |
+| :--- | :--- | :--- |
+| `PVZ_DEBUG` | `ON` | Enable cheat keys, beta features, and debug displays. Can be used in any build type no matter debug or release. |
+| `DO_FIX_BUGS` | `ON` | Apply community fixes for original game bugs. |
+| `CONSOLE` | `OFF`* | Show a console window (Windows only). *Defaults to `ON` if build type is Debug. |
+
+Example: Disable debug features and console window in a Release build
+
+```bash
+cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DCONSOLE=OFF
+```
+
 If running these commands does not create a successful build please create an issue and detail your problem.
 
 ## Contributing
