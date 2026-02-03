@@ -36,7 +36,7 @@ This project is **based on** [Patoke](https://github.com/Patoke/re-plants-vs-zom
   - Also enable to **resize the window**, which was not possible in the original game
 - [x] Replace Windows code with cross-platform code
 - [x] Replace DirectSound/BASS/FMod with [SDL Mixer X](https://github.com/WohlSoft/SDL-Mixer-X)
-  * This project uses a fork of SDL Mixer X that adds compatibility with the MO3 format by using libopenmpt. This fork is located under SexyAppFramework/sound/SDL-Mixer-X
+  - This project uses a fork of SDL Mixer X that adds compatibility with the MO3 format by using libopenmpt. This fork is located under SexyAppFramework/sound/SDL-Mixer-X
 - [x] main.pak support
 - [x] Optimize memory usage for console ports (Partial)
 - [x] **Compatible** with original PvZ GOTY Edition's ***global user data*** (profile info, adventure progress, coins, Zen Garden, etc., stored in `user*.dat`)
@@ -48,6 +48,8 @@ This project is **based on** [Patoke](https://github.com/Patoke/re-plants-vs-zom
 - [x] 32 and 64-bit builds support
 - [x] Different CPU architectures support (i686, x86_64, aarch64, riscv64, loongarch64, etc.)
 - [x] Unicode path support on all platforms
+- [x] Different endianness support (little-endian and big-endian)
+  - Theoretically supports big-endian platforms, but untested due to lack of hardware
 
 This project supports the following platforms:
 
