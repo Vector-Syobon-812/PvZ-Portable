@@ -21,9 +21,9 @@ public:
 	void					Close();
 	void					ReadBytes(void* theMem, uint32_t theNumBytes);
 	void					Rewind(uint32_t theNumBytes);
-	uint32_t			ReadLong();
-	unsigned short			ReadShort();
-	unsigned char			ReadByte();
+	uint32_t				ReadUInt32();
+	uint16_t				ReadUInt16();
+	uint8_t					ReadUInt8();
 	bool					ReadBool();
 	float					ReadFloat();
 	double					ReadDouble();
@@ -38,8 +38,8 @@ class DataWriter
 protected:
 	FILE*					mFile;			//+0x4
 	char*					mData;			//+0x8
-	uint32_t			mDataLen;		//+0xC
-	uint32_t			mCapacity;		//+0x10
+	uint32_t				mDataLen;		//+0xC
+	uint32_t				mCapacity;		//+0x10
 
 protected:
 	void					EnsureCapacity(uint32_t theNumBytes);
@@ -53,17 +53,17 @@ public:
 	void					Close();
 	inline bool				WriteToFile(const std::string& theFileName);
 	void					WriteBytes(const void* theData, uint32_t theDataLen);
-	void					WriteLong(uint32_t theLong);
-	void					WriteShort(unsigned short theShort);
-	void					WriteByte(unsigned char theChar);
+	void					WriteUInt32(uint32_t theUInt32);
+	void					WriteUInt16(uint16_t theUInt16);
+	void					WriteUInt8(uint8_t theUInt8);
 	void					WriteBool(bool theBool);
 	void					WriteFloat(float theFloat);
 	void					WriteDouble(double theDouble);
 	void					WriteString(const std::string& theStr);
 	inline uint32_t	GetPos();
-	inline void				SetLong(uint32_t, uint32_t) { /* 未找到 */ }
-	inline void				SetShort(unsigned int, uint32_t) { /* 未找到 */ }
-	inline void				SetByte(unsigned int, uint32_t) { /* 未找到 */ }
+	inline void				SetUInt32(uint32_t, uint32_t) { /* 未找到 */ }
+	inline void				SetUInt16(uint32_t, uint32_t) { /* 未找到 */ }
+	inline void				SetUInt8(uint32_t, uint32_t) { /* 未找到 */ }
 	inline void*			GetDataPtr() { return mData; }
 	inline int				GetDataLen() { return mDataLen; }
 };
@@ -97,48 +97,27 @@ public:
 	inline DataReader*		GetReader() { return mReader; }
 	inline DataWriter*		GetWriter() { return mWriter; }
 	void					SyncBytes(void* theData, uint32_t theDataLen);
-	void					SyncLong(char& theNum);
-	void					SyncLong(short& theNum);
-	void					SyncLong(long& theNum);
-	void					SyncLong(unsigned char& theNum);
-	void					SyncLong(unsigned short& theNum);
-	void					SyncLong(uint32_t& theNum);
-	void					SyncLong(int& theNum);
-	void					SyncSLong(char& theNum);
-	void					SyncSLong(short& theNum);
-	void					SyncSLong(long& theNum);
-	void					SyncSLong(unsigned char& theNum);
-	void					SyncSLong(unsigned short& theNum);
-	void					SyncSLong(uint32_t& theNum);
-	void					SyncSLong(int& theNum);
-	void					SyncShort(char& theNum);
-	void					SyncShort(short& theNum);
-	void					SyncShort(long& theNum);
-	void					SyncShort(unsigned char& theNum);
-	void					SyncShort(unsigned short& theNum);
-	void					SyncShort(uint32_t& theNum);
-	void					SyncShort(int& theNum);
-	void					SyncSShort(char& theNum);
-	void					SyncSShort(short& theNum);
-	void					SyncSShort(long& theNum);
-	void					SyncSShort(unsigned char& theNum);
-	void					SyncSShort(unsigned short& theNum);
-	void					SyncSShort(uint32_t& theNum);
-	void					SyncSShort(int& theNum);
-	void					SyncByte(char& theChar);
-	void					SyncByte(short& theChar);
-	void					SyncByte(long& theChar);
-	void					SyncByte(unsigned char& theChar);
-	void					SyncByte(unsigned short& theChar);
-	void					SyncByte(uint32_t& theChar);
-	void					SyncByte(int& theChar);
-	void					SyncSByte(char& theChar);
-	void					SyncSByte(short& theChar);
-	void					SyncSByte(long& theChar);
-	void					SyncSByte(unsigned char& theChar);
-	void					SyncSByte(unsigned short& theChar);
-	void					SyncSByte(uint32_t& theChar);
-	void					SyncSByte(int& theChar);
+	void					SyncUInt32(char& theNum);
+	void					SyncUInt32(short& theNum);
+	void					SyncUInt32(long& theNum);
+	void					SyncUInt32(unsigned char& theNum);
+	void					SyncUInt32(unsigned short& theNum);
+	void					SyncUInt32(uint32_t& theNum);
+	void					SyncUInt32(int& theNum);
+	void					SyncUInt16(char& theNum);
+	void					SyncUInt16(short& theNum);
+	void					SyncUInt16(long& theNum);
+	void					SyncUInt16(unsigned char& theNum);
+	void					SyncUInt16(unsigned short& theNum);
+	void					SyncUInt16(uint32_t& theNum);
+	void					SyncUInt16(int& theNum);
+	void					SyncUInt8(char& theChar);
+	void					SyncUInt8(short& theChar);
+	void					SyncUInt8(long& theChar);
+	void					SyncUInt8(unsigned char& theChar);
+	void					SyncUInt8(unsigned short& theChar);
+	void					SyncUInt8(uint32_t& theChar);
+	void					SyncUInt8(int& theChar);
 	void					SyncBool(bool& theBool);
 	void					SyncFloat(float& theFloat);
 	void					SyncDouble(double& theDouble);

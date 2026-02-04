@@ -7,7 +7,6 @@
 
 class Board;
 class Trail;
-enum GameMode;
 class Reanimation;
 class TodParticleSystem;
 class TodParticleEmitter;

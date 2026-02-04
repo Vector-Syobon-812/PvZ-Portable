@@ -195,7 +195,7 @@ public:
 		{
 			try
 			{
-				theValue = mReader->ReadLong();
+				theValue = mReader->ReadUInt32();
 			}
 			catch (DataReaderException&)
 			{
@@ -205,7 +205,7 @@ public:
 		}
 		else
 		{
-			mWriter->WriteLong(theValue);
+			mWriter->WriteUInt32(theValue);
 		}
 	}
 
@@ -215,7 +215,7 @@ public:
 		{
 			try
 			{
-				theValue = (int)mReader->ReadLong();
+				theValue = (int)mReader->ReadUInt32();
 			}
 			catch (DataReaderException&)
 			{
@@ -225,7 +225,7 @@ public:
 		}
 		else
 		{
-			mWriter->WriteLong((uint32_t)theValue);
+			mWriter->WriteUInt32((uint32_t)theValue);
 		}
 	}
 
@@ -2207,9 +2207,9 @@ static bool WriteChunkV4(std::vector<unsigned char>& thePayload, uint32_t theChu
 
 	DataWriter aChunkWriter;
 	aChunkWriter.OpenMemory(0x200);
-	aChunkWriter.WriteLong(SAVE4_CHUNK_VERSION);
-	aChunkWriter.WriteLong(1U);
-	aChunkWriter.WriteLong((uint32_t)aFieldWriter.GetDataLen());
+	aChunkWriter.WriteUInt32(SAVE4_CHUNK_VERSION);
+	aChunkWriter.WriteUInt32(1U);
+	aChunkWriter.WriteUInt32((uint32_t)aFieldWriter.GetDataLen());
 	aChunkWriter.WriteBytes(aFieldWriter.GetDataPtr(), aFieldWriter.GetDataLen());
 
 	std::vector<unsigned char> aChunk;

@@ -18,8 +18,8 @@ PlayerInfo::PlayerInfo()
 void PlayerInfo::SyncSummary(DataSync& theSync)
 {
 	theSync.SyncString(mName);
-	theSync.SyncLong(mUseSeq);
-	theSync.SyncLong(mId);
+	theSync.SyncUInt32(mUseSeq);
+	theSync.SyncUInt32(mId);
 }
 
 //0x468390
@@ -31,45 +31,45 @@ void PlayerInfo::SyncDetails(DataSync& theSync)
 	}
 
 	int aVersion = gUserVersion;
-	theSync.SyncLong(aVersion);
+	theSync.SyncUInt32(aVersion);
 	theSync.SetVersion(aVersion);
 	if (aVersion != gUserVersion)
 	{
 		return;
 	}
 
-	theSync.SyncLong(mLevel);
-	theSync.SyncLong(mCoins);
-	theSync.SyncLong(mFinishedAdventure);
+	theSync.SyncUInt32(mLevel);
+	theSync.SyncUInt32(mCoins);
+	theSync.SyncUInt32(mFinishedAdventure);
 	for (int i = 0; i < 100; i++)
 	{
-		theSync.SyncLong(mChallengeRecords[i]);
+		theSync.SyncUInt32(mChallengeRecords[i]);
 	}
 	for (int i = 0; i < 80; i++)
 	{
-		theSync.SyncLong(mPurchases[i]);
+		theSync.SyncUInt32(mPurchases[i]);
 	}
-	theSync.SyncLong(mPlayTimeActivePlayer);
-	theSync.SyncLong(mPlayTimeInactivePlayer);
-	theSync.SyncLong(mHasUsedCheatKeys);
-	theSync.SyncLong(mHasWokenStinky);
-	theSync.SyncLong(mDidntPurchasePacketUpgrade);
-	theSync.SyncLong(mLastStinkyChocolateTime);
-	theSync.SyncLong(mStinkyPosX);
-	theSync.SyncLong(mStinkyPosY);
-	theSync.SyncLong(mHasUnlockedMinigames);
-	theSync.SyncLong(mHasUnlockedPuzzleMode);
-	theSync.SyncLong(mHasNewMiniGame);
-	theSync.SyncLong(mHasNewScaryPotter);
-	theSync.SyncLong(mHasNewIZombie);
-	theSync.SyncLong(mHasNewSurvival);
-	theSync.SyncLong(mHasUnlockedSurvivalMode);
-	theSync.SyncLong(mNeedsMessageOnGameSelector);
-	theSync.SyncLong(mNeedsMagicTacoReward);
-	theSync.SyncLong(mHasSeenStinky);
-	theSync.SyncLong(mHasSeenUpsell);
-	theSync.SyncLong(mPlaceHolderPlayerStats);
-	theSync.SyncLong(mNumPottedPlants);
+	theSync.SyncUInt32(mPlayTimeActivePlayer);
+	theSync.SyncUInt32(mPlayTimeInactivePlayer);
+	theSync.SyncUInt32(mHasUsedCheatKeys);
+	theSync.SyncUInt32(mHasWokenStinky);
+	theSync.SyncUInt32(mDidntPurchasePacketUpgrade);
+	theSync.SyncUInt32(mLastStinkyChocolateTime);
+	theSync.SyncUInt32(mStinkyPosX);
+	theSync.SyncUInt32(mStinkyPosY);
+	theSync.SyncUInt32(mHasUnlockedMinigames);
+	theSync.SyncUInt32(mHasUnlockedPuzzleMode);
+	theSync.SyncUInt32(mHasNewMiniGame);
+	theSync.SyncUInt32(mHasNewScaryPotter);
+	theSync.SyncUInt32(mHasNewIZombie);
+	theSync.SyncUInt32(mHasNewSurvival);
+	theSync.SyncUInt32(mHasUnlockedSurvivalMode);
+	theSync.SyncUInt32(mNeedsMessageOnGameSelector);
+	theSync.SyncUInt32(mNeedsMagicTacoReward);
+	theSync.SyncUInt32(mHasSeenStinky);
+	theSync.SyncUInt32(mHasSeenUpsell);
+	theSync.SyncUInt32(mPlaceHolderPlayerStats);
+	theSync.SyncUInt32(mNumPottedPlants);
 	
 	TOD_ASSERT(mNumPottedPlants <= MAX_POTTED_PLANTS);
 	for (int i = 0; i < mNumPottedPlants; i++)
@@ -82,7 +82,7 @@ void PlayerInfo::SyncDetails(DataSync& theSync)
 	for (int i = 0; i < 20; i++)
 	{
 		unsigned short aAchievementValue = mEarnedAchievements[i] ? 1 : 0;
-		theSync.SyncShort(aAchievementValue);
+		theSync.SyncUInt16(aAchievementValue);
 		if (theSync.GetReader())
 		{
 			mEarnedAchievements[i] = (aAchievementValue != 0);
@@ -102,10 +102,10 @@ void PlayerInfo::SyncDetails(DataSync& theSync)
 	}
 
 	// Write a minimal, safe layout (no Zombatars).
-	theSync.SyncByte(mZombatarAccepted);
-	theSync.SyncLong(mZombatarHeadCount);
+	theSync.SyncUInt8(mZombatarAccepted);
+	theSync.SyncUInt32(mZombatarHeadCount);
 	theSync.SyncBytes(mZombatarTrailingUnknown, sizeof(mZombatarTrailingUnknown));
-	theSync.SyncByte(mZombatarCreatedBefore);
+	theSync.SyncUInt8(mZombatarCreatedBefore);
 }
 
 //0x469400

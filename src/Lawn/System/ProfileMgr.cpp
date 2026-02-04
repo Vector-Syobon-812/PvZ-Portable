@@ -34,7 +34,7 @@ void ProfileMgr::SyncState(DataSync& theSync)
     DataWriter* aWriter = theSync.GetWriter();
 
     int aVersion = gProfileVersion;
-    theSync.SyncLong(aVersion);
+    theSync.SyncUInt32(aVersion);
     theSync.SetVersion(aVersion);
     if (aVersion == gProfileVersion)
     {
@@ -44,7 +44,7 @@ void ProfileMgr::SyncState(DataSync& theSync)
 
             ulong aMaxProfileId = 0;
             ulong aMaxUseSeq = 0;
-            for (int aProfileCount = aReader->ReadShort(); aProfileCount > 0; aProfileCount--)
+            for (int aProfileCount = aReader->ReadUInt16(); aProfileCount > 0; aProfileCount--)
             {
                 PlayerInfo aProfile;
                 aProfile.SyncSummary(theSync);
@@ -62,7 +62,7 @@ void ProfileMgr::SyncState(DataSync& theSync)
         }
         else
         {
-            aWriter->WriteShort((short)mProfileMap.size());
+            aWriter->WriteUInt16((uint16_t)mProfileMap.size());
             
             for (auto anItr = mProfileMap.begin(); anItr != mProfileMap.end(); anItr++)
                 anItr->second.SyncSummary(theSync);

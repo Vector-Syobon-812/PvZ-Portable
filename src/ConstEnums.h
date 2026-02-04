@@ -1,6 +1,6 @@
 #pragma once
 
-enum AdviceType
+enum AdviceType : int
 {
     ADVICE_NONE = -1,
     ADVICE_CLICK_ON_SUN = 0,
@@ -71,13 +71,13 @@ enum AdviceType
     ADVICE_NEED_WHEELBARROW,
     NUM_ADVICE_TYPES
 };
-enum AlmanacPage
+enum AlmanacPage : int
 {
     ALMANAC_PAGE_INDEX,
     ALMANAC_PAGE_PLANTS,
     ALMANAC_PAGE_ZOMBIES
 };
-enum AwardType
+enum AwardType : int
 {
     AWARD_FORLEVEL,
     AWARD_CREDITS_ZOMBIENOTE,
@@ -85,7 +85,7 @@ enum AwardType
     AWARD_ACHIEVEMENTONLY,
     AWARD_PRECREDITS_ZOMBIENOTE,
 };
-enum BackgroundType
+enum BackgroundType : int
 {
     BACKGROUND_1_DAY,
     BACKGROUND_2_NIGHT,
@@ -98,7 +98,7 @@ enum BackgroundType
     BACKGROUND_ZOMBIQUARIUM,
     BACKGROUND_TREEOFWISDOM
 };
-enum BoardResult
+enum BoardResult : int
 {
     BOARDRESULT_NONE = 0,
     BOARDRESULT_WON = 1,
@@ -108,7 +108,7 @@ enum BoardResult
     BOARDRESULT_QUIT_APP = 5,
     BOARDRESULT_CHEAT = 6
 };
-enum BossPart
+enum BossPart : int
 {
     BOSS_PART_BACK_LEG = 0,
     BOSS_PART_FRONT_LEG = 1,
@@ -116,7 +116,7 @@ enum BossPart
     BOSS_PART_BACK_ARM = 3,
     BOSS_PART_FIREBALL = 4
 };
-enum ChallengePage
+enum ChallengePage : int
 {
     CHALLENGE_PAGE_SURVIVAL = 0,
     CHALLENGE_PAGE_CHALLENGE = 1,
@@ -124,7 +124,7 @@ enum ChallengePage
     CHALLENGE_PAGE_PUZZLE = 3,
     MAX_CHALLANGE_PAGES = 4
 };
-enum ChallengeState
+enum ChallengeState : int
 {
     STATECHALLENGE_NORMAL,
     STATECHALLENGE_BEGHOULED_MOVING,
@@ -142,7 +142,7 @@ enum ChallengeState
     STATECHALLENGE_TREE_WAITING_TO_BABBLE,
     STATECHALLENGE_TREE_BABBLING
 };
-enum ChosenSeedState
+enum ChosenSeedState : int
 {
     SEED_FLYING_TO_BANK = 0,
     SEED_IN_BANK = 1,
@@ -150,7 +150,7 @@ enum ChosenSeedState
     SEED_IN_CHOOSER = 3,
     SEED_PACKET_HIDDEN = 4
 };
-enum CoinMotion
+enum CoinMotion : int
 {
     COIN_MOTION_FROM_SKY = 0,
     COIN_MOTION_FROM_SKY_SLOW = 1,
@@ -160,7 +160,7 @@ enum CoinMotion
     COIN_MOTION_FROM_PRESENT = 5,
     COIN_MOTION_FROM_BOSS = 6
 };
-enum CoinType
+enum CoinType : int
 {
     COIN_NONE,
     COIN_SILVER,
@@ -191,7 +191,7 @@ enum CoinType
     COIN_PRESENT_PUZZLE_MODE,
     COIN_PRESENT_SURVIVAL_MODE,
 };
-enum CrazyDaveState
+enum CrazyDaveState : int
 {
     CRAZY_DAVE_OFF = 0,
     CRAZY_DAVE_ENTERING = 1,
@@ -201,7 +201,7 @@ enum CrazyDaveState
     CRAZY_DAVE_HANDING_TALKING = 5,
     CRAZY_DAVE_HANDING_IDLING = 6
 };
-enum CursorType
+enum CursorType : int
 {
     CURSOR_TYPE_NORMAL,
     CURSOR_TYPE_PLANT_FROM_BANK,
@@ -222,7 +222,7 @@ enum CursorType
     CURSOR_TYPE_WHEEELBARROW,
     CURSOR_TYPE_TREE_FOOD
 };
-enum DamageFlags
+enum DamageFlags : int
 {
     DAMAGE_BYPASSES_SHIELD = 0,
     DAMAGE_HITS_SHIELD_AND_BODY = 1,
@@ -231,7 +231,7 @@ enum DamageFlags
     DAMAGE_DOESNT_LEAVE_BODY = 4,
     DAMAGE_SPIKE = 5
 };
-enum DamageRangeFlags
+enum DamageRangeFlags : int
 {
     DAMAGES_GROUND,
     DAMAGES_FLYING,
@@ -242,7 +242,7 @@ enum DamageRangeFlags
     DAMAGES_UNDERGROUND,
     DAMAGES_ONLY_MINDCONTROLLED
 };
-enum Dialogs
+enum Dialogs : int
 {
     DIALOG_NEW_GAME,                            // 0：
     DIALOG_OPTIONS,                             // 1：
@@ -297,7 +297,7 @@ enum Dialogs
     DIALOG_PURCHASE_PACKET_SLOT,                // 50：升级卡槽的格子数量
     NUM_DIALOGS
 };
-enum DebugTextMode
+enum DebugTextMode : int
 {
     DEBUG_TEXT_NONE = 0,
     DEBUG_TEXT_ZOMBIE_SPAWN = 1,
@@ -305,7 +305,7 @@ enum DebugTextMode
     DEBUG_TEXT_MEMORY = 3,
     DEBUG_TEXT_COLLISION = 4
 };
-enum DrawStringJustification
+enum DrawStringJustification : int
 {
     DS_ALIGN_LEFT = 0,
     DS_ALIGN_RIGHT = 1,
@@ -314,7 +314,7 @@ enum DrawStringJustification
     DS_ALIGN_RIGHT_VERTICAL_MIDDLE = 4,
     DS_ALIGN_CENTER_VERTICAL_MIDDLE = 5
 };
-enum DrawVariation
+enum DrawVariation : int
 {
     VARIATION_NORMAL,
     VARIATION_IMITATER,
@@ -335,7 +335,7 @@ enum DrawVariation
     VARIATION_IMITATER_LESS,
     VARIATION_AQUARIUM
 };
-enum EffectType
+enum EffectType : int
 {
     EFFECT_PARTICLE = 0,
     EFFECT_TRAIL = 1,
@@ -343,7 +343,7 @@ enum EffectType
     EFFECT_ATTACHMENT = 3,
     EFFECT_OTHER = 4
 };
-enum EmitterType
+enum EmitterType : int
 {
     EMITTER_CIRCLE = 0,
     EMITTER_BOX = 1,
@@ -351,7 +351,7 @@ enum EmitterType
     EMITTER_CIRCLE_PATH = 3,
     EMITTER_CIRCLE_EVEN_SPACING = 4
 };
-enum GameMode
+enum GameMode : int
 {
     GAMEMODE_ADVENTURE,
     GAMEMODE_SURVIVAL_NORMAL_STAGE_1,
@@ -428,7 +428,7 @@ enum GameMode
     GAMEMODE_INTRO,
     NUM_GAME_MODES
 };
-enum GameObjectType
+enum GameObjectType : int
 {
     OBJECT_TYPE_NONE,
     OBJECT_TYPE_PLANT,
@@ -453,7 +453,7 @@ enum GameObjectType
     OBJECT_TYPE_STINKY,
     OBJECT_TYPE_TREE_OF_WISDOM
 };
-enum GameScenes
+enum GameScenes : int
 {
     SCENE_LOADING = 0,
     SCENE_MENU = 1,
@@ -464,14 +464,14 @@ enum GameScenes
     SCENE_CREDIT = 6,
     SCENE_CHALLENGE = 7
 };
-enum GardenType
+enum GardenType : int
 {
     GARDEN_MAIN = 0,
     GARDEN_MUSHROOM = 1,
     GARDEN_WHEELBARROW = 2,
     GARDEN_AQUARIUM = 3
 };
-enum GridItemType
+enum GridItemType : int
 {
     GRIDITEM_NONE = 0,
     GRIDITEM_GRAVESTONE = 1,
@@ -487,7 +487,7 @@ enum GridItemType
     GRIDITEM_RAKE = 11,
     GRIDITEM_IZOMBIE_BRAIN = 12
 };
-enum GridItemState
+enum GridItemState : int
 {
     GRIDITEM_STATE_NORMAL = 0,
     GRIDITEM_STATE_GRAVESTONE_SPECIAL = 1,
@@ -520,7 +520,7 @@ enum GridItemState
     GRIDITEM_STATE_RAKE_TRIGGERED = 28,
     GRIDITEM_STATE_BRAIN_SQUISHED = 29
 };
-enum GridSquareType
+enum GridSquareType : int
 {
     GRIDSQUARE_NONE = 0,
     GRIDSQUARE_GRASS = 1,
@@ -528,7 +528,7 @@ enum GridSquareType
     GRIDSQUARE_POOL = 3,
     GRIDSQUARE_HIGH_GROUND = 4
 };
-enum HelmType
+enum HelmType : int
 {
     HELMTYPE_NONE = 0,
     HELMTYPE_TRAFFIC_CONE = 1,
@@ -541,14 +541,14 @@ enum HelmType
     HELMTYPE_WALLNUT = 8,
     HELMTYPE_TALLNUT = 9
 };
-enum LawnMowerState
+enum LawnMowerState : int
 {
     MOWER_ROLLING_IN = 0,
     MOWER_READY = 1,
     MOWER_TRIGGERED = 2,
     MOWER_SQUISHED = 3
 };
-enum LawnMowerType
+enum LawnMowerType : int
 {
     LAWNMOWER_LAWN,
     LAWNMOWER_POOL,
@@ -556,7 +556,7 @@ enum LawnMowerType
     LAWNMOWER_SUPER_MOWER,
     NUM_MOWER_TYPES
 };
-enum MessageStyle
+enum MessageStyle : int
 {
     MESSAGE_STYLE_OFF,
     MESSAGE_STYLE_TUTORIAL_LEVEL1,
@@ -579,14 +579,14 @@ enum MessageStyle
     MESSAGE_STYLE_ZEN_GARDEN_LONG,
     MESSAGE_STYLE_ACHIEVEMENT // @Patoke: implemented
 };
-enum MowerHeight
+enum MowerHeight : int
 {
     MOWER_HEIGHT_LAND = 0,
     MOWER_HEIGHT_DOWN_TO_POOL = 1,
     MOWER_HEIGHT_IN_POOL = 2,
     MOWER_HEIGHT_UP_TO_LAND = 3
 };
-enum NotRecommend
+enum NotRecommend : int
 {
     NOT_RECOMMENDED_NOCTURNAL,
     NOT_RECOMMENDED_NEEDS_POOL,
@@ -597,7 +597,7 @@ enum NotRecommend
     NOT_RECOMMENDED_FOR_CHALLENGE,
     NOT_RECOMMENDED_AT_NIGHT
 };
-enum ParticleEffect
+enum ParticleEffect : int
 {
     PARTICLE_NONE = -1,
     PARTICLE_MELONSPLASH,
@@ -708,7 +708,7 @@ enum ParticleEffect
     PARTICLE_PERSENT_PICK_UP_ARROW,
     NUM_PARTICLES
 };
-enum PlantPriority
+enum PlantPriority : int
 {
     TOPPLANT_EATING_ORDER,
     TOPPLANT_DIGGING_ORDER,
@@ -721,7 +721,7 @@ enum PlantPriority
     TOPPLANT_ONLY_PUMPKIN,
     TOPPLANT_ONLY_UNDER_PLANT
 };
-enum PlantingReason
+enum PlantingReason : int
 {
     PLANTING_OK,
     PLANTING_NOT_HERE,
@@ -738,21 +738,21 @@ enum PlantingReason
     PLANTING_NEEDS_GROUND,
     PLANTING_NEEDS_SLEEPING
 };
-enum PlantRowType
+enum PlantRowType : int
 {
     PLANTROW_DIRT = 0,
     PLANTROW_NORMAL = 1,
     PLANTROW_POOL = 2,
     PLANTROW_HIGH_GROUND = 3
 };
-enum PottedPlantAge
+enum PottedPlantAge : int
 {
     PLANTAGE_SPROUT = 0,
     PLANTAGE_SMALL = 1,
     PLANTAGE_MEDIUM = 2,
     PLANTAGE_FULL = 3
 };
-enum PottedPlantNeed
+enum PottedPlantNeed : int
 {
     PLANTNEED_NONE = 0,
     PLANTNEED_WATER = 1,
@@ -760,7 +760,7 @@ enum PottedPlantNeed
     PLANTNEED_BUGSPRAY = 3,
     PLANTNEED_PHONOGRAPH = 4
 };
-enum ProjectileMotion
+enum ProjectileMotion : int
 {
     MOTION_STRAIGHT = 0,  // 水平向右
     MOTION_LOBBED = 1,  // 抛物线
@@ -773,7 +773,7 @@ enum ProjectileMotion
     MOTION_FLOAT_OVER = 8,  // 缓慢漂浮向右（无碰撞）
     MOTION_HOMING = 9   // 追踪
 };
-enum ProjectileType
+enum ProjectileType : int
 {
     PROJECTILE_PEA = 0,   // 豌豆
     PROJECTILE_SNOWPEA = 1,   // 冰豌豆
@@ -938,7 +938,7 @@ enum ReanimationType : unsigned int {
     REANIM_FLAG,
     NUM_REANIMS
 };
-enum ReanimLoopType
+enum ReanimLoopType : int
 {
     REANIM_LOOP = 0,
     REANIM_LOOP_FULL_LAST_FRAME = 1,
@@ -947,7 +947,7 @@ enum ReanimLoopType
     REANIM_PLAY_ONCE_FULL_LAST_FRAME = 4,
     REANIM_PLAY_ONCE_FULL_LAST_FRAME_AND_HOLD = 5
 };
-enum RenderLayer
+enum RenderLayer : int
 {
     RENDER_LAYER_ROW_OFFSET     = 10000,
     RENDER_LAYER_UI_BOTTOM      = 100000,
@@ -967,7 +967,7 @@ enum RenderLayer
     RENDER_LAYER_ABOVE_UI       = 800000,
     RENDER_LAYER_SCREEN_FADE    = 900000
 };
-enum RenderObjectType
+enum RenderObjectType : int
 {
     RENDER_ITEM_COIN,
     RENDER_ITEM_PROJECTILE,
@@ -995,19 +995,19 @@ enum RenderObjectType
     RENDER_ITEM_GRID_ITEM,
     RENDER_ITEM_GRID_ITEM_OVERLAY
 };
-enum ScaryPotType
+enum ScaryPotType : int
 {
     SCARYPOT_NONE = 0,
     SCARYPOT_SEED = 1,
     SCARYPOT_ZOMBIE = 2,
     SCARYPOT_SUN = 3
 };
-enum SeedChooserState
+enum SeedChooserState : int
 {
     CHOOSE_NORMAL = 0,
     CHOOSE_VIEW_LAWN = 1
 };
-enum SeedType
+enum SeedType : int
 {
     SEED_PEASHOOTER = 0,                    // 豌豆射手
     SEED_SUNFLOWER = 1,                     // 向日葵
@@ -1087,14 +1087,14 @@ enum SeedType
     NUM_SEEDS_IN_CHOOSER = 49,
     SEED_NONE = -1
 };
-enum ShieldType
+enum ShieldType : int
 {
     SHIELDTYPE_NONE,
     SHIELDTYPE_DOOR,
     SHIELDTYPE_NEWSPAPER,
     SHIELDTYPE_LADDER
 };
-enum StoreItem
+enum StoreItem : int
 {
     STORE_ITEM_PLANT_GATLINGPEA,
     STORE_ITEM_PLANT_TWINSUNFLOWER,
@@ -1137,7 +1137,7 @@ enum StorePages : int
     STORE_PAGE_ZEN2 = 3,
     NUM_STORE_PAGES = 4
 };
-enum TodCurves
+enum TodCurves : int
 {
     CURVE_CONSTANT,             // 常函数曲线
     CURVE_LINEAR,               // 线性曲线
@@ -1154,12 +1154,12 @@ enum TodCurves
     CURVE_SIN_WAVE,             // 正弦曲线
     CURVE_EASE_SIN_WAVE         // 缓入缓出的正弦曲线
 };
-enum TrialType
+enum TrialType : int
 {
     TRIALTYPE_NONE,
     TRIALTYPE_STAGELOCKED
 };
-enum TutorialState
+enum TutorialState : int
 {
     TUTORIAL_OFF = 0,
     TUTORIAL_LEVEL_1_PICK_UP_PEASHOOTER = 1,
@@ -1193,13 +1193,13 @@ enum TutorialState
     TUTORIAL_WHACK_A_ZOMBIE_PICK_SEED = 29,
     TUTORIAL_WHACK_A_ZOMBIE_COMPLETED = 30
 };
-enum UnlockingState
+enum UnlockingState : int
 {
     UNLOCK_OFF,
     UNLOCK_SHAKING,
     UNLOCK_FADING
 };
-enum ZombieHeight
+enum ZombieHeight : int
 {
     HEIGHT_ZOMBIE_NORMAL = 0,
     HEIGHT_IN_TO_POOL = 1,
@@ -1213,7 +1213,7 @@ enum ZombieHeight
     HEIGHT_GETTING_BUNGEE_DROPPED = 9,
     HEIGHT_ZOMBIQUARIUM = 10
 };
-enum ZombiePhase
+enum ZombiePhase : int
 {
     PHASE_ZOMBIE_NORMAL,
     PHASE_ZOMBIE_DYING,
@@ -1312,7 +1312,7 @@ enum ZombiePhase
     PHASE_SQUASH_FALLING,
     PHASE_SQUASH_DONE_FALLING
 };
-enum ZombieType
+enum ZombieType : int
 {
     ZOMBIE_INVALID = -1,
     ZOMBIE_NORMAL,

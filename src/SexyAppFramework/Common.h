@@ -9,6 +9,7 @@
 #include <ctime>
 #include <filesystem>
 #include <type_traits>
+#include <bit>
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -184,6 +185,21 @@ inline std::filesystem::path PathFromU8(const std::string& s) { return std::file
 inline std::string PathToU8(const std::filesystem::path& p) { return p.string(); }
 #endif
 
+// Byte swap helpers
+inline constexpr uint16_t ByteSwap16(uint16_t v) noexcept
+{
+	if (!std::is_constant_evaluated()) {
+#if defined(__has_builtin)
+#	if __has_builtin(__builtin_bswap16)
+		return __builtin_bswap16(v);
+#	endif
+#elif defined(_MSC_VER)
+		return _byteswap_ushort(v);
+#endif
+	}
+	return (v >> 8) | (v << 8);
+}
+
 inline constexpr uint32_t ByteSwap32(uint32_t v) noexcept
 {
 	if (!std::is_constant_evaluated()) {
@@ -195,10 +211,74 @@ inline constexpr uint32_t ByteSwap32(uint32_t v) noexcept
 		return _byteswap_ulong(v);
 #endif
 	}
-    return ((v & 0x000000FFu) << 24) |
-           ((v & 0x0000FF00u) <<  8) |
-           ((v & 0x00FF0000u) >>  8) |
-           ((v & 0xFF000000u) >> 24);
+	return ((v & 0x000000FFu) << 24) |
+	       ((v & 0x0000FF00u) <<  8) |
+	       ((v & 0x00FF0000u) >>  8) |
+	       ((v & 0xFF000000u) >> 24);
+}
+
+inline constexpr uint64_t ByteSwap64(uint64_t v) noexcept
+{
+	if (!std::is_constant_evaluated()) {
+#if defined(__has_builtin)
+#	if __has_builtin(__builtin_bswap64)
+		return __builtin_bswap64(v);
+#	endif
+#elif defined(_MSC_VER)
+		return _byteswap_uint64(v);
+#endif
+	}
+	return ((v & 0x00000000000000FFULL) << 56) |
+	       ((v & 0x000000000000FF00ULL) << 40) |
+	       ((v & 0x0000000000FF0000ULL) << 24) |
+	       ((v & 0x00000000FF000000ULL) <<  8) |
+	       ((v & 0x000000FF00000000ULL) >>  8) |
+	       ((v & 0x0000FF0000000000ULL) >> 24) |
+	       ((v & 0x00FF000000000000ULL) >> 40) |
+	       ((v & 0xFF00000000000000ULL) >> 56);
+}
+
+// Little-endian conversion helpers (file format is always little-endian)
+inline constexpr uint16_t FromLE16(uint16_t v) noexcept
+{
+	if constexpr (std::endian::native == std::endian::big)
+		return ByteSwap16(v);
+	return v;
+}
+
+inline constexpr uint16_t ToLE16(uint16_t v) noexcept
+{
+	if constexpr (std::endian::native == std::endian::big)
+		return ByteSwap16(v);
+	return v;
+}
+
+inline constexpr uint32_t FromLE32(uint32_t v) noexcept
+{
+	if constexpr (std::endian::native == std::endian::big)
+		return ByteSwap32(v);
+	return v;
+}
+
+inline constexpr uint32_t ToLE32(uint32_t v) noexcept
+{
+	if constexpr (std::endian::native == std::endian::big)
+		return ByteSwap32(v);
+	return v;
+}
+
+inline constexpr uint64_t FromLE64(uint64_t v) noexcept
+{
+	if constexpr (std::endian::native == std::endian::big)
+		return ByteSwap64(v);
+	return v;
+}
+
+inline constexpr uint64_t ToLE64(uint64_t v) noexcept
+{
+	if constexpr (std::endian::native == std::endian::big)
+		return ByteSwap64(v);
+	return v;
 }
 
 struct StringLessNoCase { bool operator()(const std::string &s1, const std::string &s2) const { return strcasecmp(s1.c_str(),s2.c_str())<0; } };
