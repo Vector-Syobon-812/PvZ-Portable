@@ -29,7 +29,7 @@ PakInterface::~PakInterface()
 // Normalize path for pak lookup.
 static std::string NormalizePakPath(const char* theFileName)
 {
-	std::filesystem::path filePath(theFileName);
+	std::filesystem::path filePath = Sexy::PathFromU8(theFileName);
 
 	// Make absolute paths relative to resource folder.
 	if (filePath.is_absolute())
@@ -37,7 +37,7 @@ static std::string NormalizePakPath(const char* theFileName)
 		const std::string& resourceFolder = Sexy::GetResourceFolder();
 		if (!resourceFolder.empty())
 		{
-			std::filesystem::path resPath(resourceFolder);
+			std::filesystem::path resPath = Sexy::PathFromU8(resourceFolder);
 			auto [resEnd, fileIt] = std::mismatch(resPath.begin(), resPath.end(), 
 			                                       filePath.begin(), filePath.end());
 			if (resEnd == resPath.end())
@@ -50,7 +50,7 @@ static std::string NormalizePakPath(const char* theFileName)
 		}
 	}
 
-	std::string result = filePath.lexically_normal().generic_string();
+	std::string result = Sexy::PathToU8(filePath.lexically_normal());
 	
 	if (result.size() >= 2 && result[0] == '.' && result[1] == '/')
 		result = result.substr(2);
@@ -181,7 +181,7 @@ PFILE* PakInterface::FOpen(const char* theFileName, const char* anAccess)
 
 	const std::string& aResourceBase = Sexy::GetResourceFolder();
 	FILE* aFP = nullptr;
-	if (!aResourceBase.empty() && !std::filesystem::path(theFileName).has_root_directory())
+	if (!aResourceBase.empty() && !Sexy::PathFromU8(theFileName).has_root_directory())
 	{
 		aFP = fcaseopenat(aResourceBase.c_str(), theFileName, anAccess);
 	}

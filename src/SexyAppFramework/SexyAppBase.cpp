@@ -48,8 +48,6 @@
 #include "misc/Debug.h"
 #include "paklib/PakInterface.h"
 #include "sound/DummyMusicInterface.h"
-#include "fcaseopen/fcaseopen.h"
-
 #include "misc/memmgr.h"
 #include "misc/RegEmu.h"
 
@@ -336,19 +334,15 @@ bool SexyAppBase::AppCanRestore()
 
 bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 {
-	FILE* aFP = fopen(mDemoFileName.c_str(), "rb");
-
-	if (aFP == nullptr)
+	std::ifstream aFile(PathFromU8(mDemoFileName), std::ios::in | std::ios::binary);
+	if (!aFile)
 	{
 		theError = "Demo file not found: " + mDemoFileName;
 		return false;
 	}
 
-	struct AutoFile { FILE *f; AutoFile(FILE *file) : f(file) {} ~AutoFile() { fclose(f); } };
-	AutoFile aCloseFile(aFP);
-
 	uint32_t aFileID;
-	if (fread(&aFileID, 4, 1, aFP) != 1) return false;
+	if (!aFile.read(reinterpret_cast<char*>(&aFileID), sizeof(aFileID))) return false;
 
 	DBG_ASSERTE(aFileID == DEMO_FILE_ID);
 	if (aFileID != DEMO_FILE_ID)
@@ -359,17 +353,17 @@ bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 
 
 	uint32_t aVersion;
-	if (fread(&aVersion, 4, 1, aFP) != 1) return false;
+	if (!aFile.read(reinterpret_cast<char*>(&aVersion), sizeof(aVersion))) return false;
 	
-	if (fread(&mRandSeed, 4, 1, aFP) != 1) return false;
+	if (!aFile.read(reinterpret_cast<char*>(&mRandSeed), sizeof(mRandSeed))) return false;
 	SRand(mRandSeed);
 
 	ushort aStrLen = 4;
-	if (fread(&aStrLen, 2, 1, aFP) != 1) return false;
+	if (!aFile.read(reinterpret_cast<char*>(&aStrLen), sizeof(aStrLen))) return false;
 	if (aStrLen > 255)
 		aStrLen = 255;
 	char aStr[256];
-	if (fread(aStr, 1, aStrLen, aFP) != aStrLen) return false;
+	if (!aFile.read(aStr, aStrLen)) return false;
 	aStr[aStrLen] = '\0';
 
 	DBG_ASSERTE(mProductVersion == aStr);
@@ -379,17 +373,18 @@ bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 		return false;
 	}
 
-	int aFilePos = ftell(aFP);
-	fseek(aFP, 0, SEEK_END);
-	int aBytesLeft = ftell(aFP) - aFilePos;
-	fseek(aFP, aFilePos, SEEK_SET);
+	std::streampos aFilePos = aFile.tellg();
+	aFile.seekg(0, std::ios::end);
+	std::streampos aFileEnd = aFile.tellg();
+	aFile.seekg(aFilePos, std::ios::beg);
+	int aBytesLeft = static_cast<int>(aFileEnd - aFilePos);
 
 	uchar* aBuffer;
 	// read marker list
 	if (aVersion >= 2) 
 	{
 		int aSize;
-		if (fread(&aSize, 4, 1, aFP) != 1) return false;
+		if (!aFile.read(reinterpret_cast<char*>(&aSize), sizeof(aSize))) return false;
 		aBytesLeft -= 4;
 
 		if (aSize >= aBytesLeft)
@@ -401,7 +396,7 @@ bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 		Buffer aMarkerBuffer;
 
 		aBuffer = new uchar[aSize];
-		if (fread(aBuffer, 1, aSize, aFP) != static_cast<size_t>(aSize)) { delete [] aBuffer; return false; }
+		if (!aFile.read(reinterpret_cast<char*>(aBuffer), aSize)) { delete [] aBuffer; return false; }
 		aMarkerBuffer.WriteBytes(aBuffer, aSize);
 		aMarkerBuffer.SeekFront();
 
@@ -427,7 +422,7 @@ bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 	}
 
 	// Read demo commands
-	if (fread(&mDemoLength, 4, 1, aFP) != 1) return false;
+	if (!aFile.read(reinterpret_cast<char*>(&mDemoLength), sizeof(mDemoLength))) return false;
 	aBytesLeft -= 4;
 	
 	if (aBytesLeft <= 0)
@@ -438,7 +433,7 @@ bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 
 
 	aBuffer = new uchar[aBytesLeft];
-	if (fread(aBuffer, 1, aBytesLeft, aFP) != static_cast<size_t>(aBytesLeft)) { delete [] aBuffer; return false; }		
+	if (!aFile.read(reinterpret_cast<char*>(aBuffer), aBytesLeft)) { delete [] aBuffer; return false; }		
 
 	mDemoBuffer.WriteBytes(aBuffer, aBytesLeft);
 	mDemoBuffer.SeekFront();
@@ -451,21 +446,20 @@ void SexyAppBase::WriteDemoBuffer()
 {
 	if (mRecordingDemoBuffer)
 	{
-		FILE* aFP = fopen(mDemoFileName.c_str(), "w+b");
-
-		if (aFP != nullptr)
+		std::ofstream aFile(PathFromU8(mDemoFileName), std::ios::out | std::ios::binary | std::ios::trunc);
+		if (aFile)
 		{
 			uint32_t aFileID = DEMO_FILE_ID;
-			fwrite(&aFileID, 4, 1, aFP);		
+			aFile.write(reinterpret_cast<const char*>(&aFileID), sizeof(aFileID));		
 
 			uint32_t aVersion = DEMO_VERSION;
-			fwrite(&aVersion, 4, 1, aFP);
+			aFile.write(reinterpret_cast<const char*>(&aVersion), sizeof(aVersion));
 			
-			fwrite(&mRandSeed, 4, 1, aFP);
+			aFile.write(reinterpret_cast<const char*>(&mRandSeed), sizeof(mRandSeed));
 
 			ushort aStrLen = mProductVersion.length();
-			fwrite(&aStrLen, 2, 1, aFP);		
-			fwrite(mProductVersion.c_str(), 1, mProductVersion.length(), aFP);
+			aFile.write(reinterpret_cast<const char*>(&aStrLen), sizeof(aStrLen));		
+			aFile.write(mProductVersion.c_str(), static_cast<std::streamsize>(mProductVersion.length()));
 
 			Buffer aMarkerBuffer;
 			aMarkerBuffer.WriteLong(mDemoMarkerList.size());
@@ -475,14 +469,13 @@ void SexyAppBase::WriteDemoBuffer()
 				aMarkerBuffer.WriteLong(aMarkerItr->second);
 			}
 			int aMarkerBufferSize = aMarkerBuffer.GetDataLen();
-			fwrite(&aMarkerBufferSize, 4, 1, aFP);
-			fwrite(aMarkerBuffer.GetDataPtr(), aMarkerBufferSize, 1, aFP);
+			aFile.write(reinterpret_cast<const char*>(&aMarkerBufferSize), sizeof(aMarkerBufferSize));
+			aFile.write(reinterpret_cast<const char*>(aMarkerBuffer.GetDataPtr()), aMarkerBufferSize);
 
 			uint32_t aDemoLength = mUpdateCount;
-			fwrite(&aDemoLength, 4, 1, aFP);
+			aFile.write(reinterpret_cast<const char*>(&aDemoLength), sizeof(aDemoLength));
 
-			fwrite(mDemoBuffer.GetDataPtr(), 1, mDemoBuffer.GetDataLen(), aFP);
-			fclose(aFP);
+			aFile.write(reinterpret_cast<const char*>(mDemoBuffer.GetDataPtr()), mDemoBuffer.GetDataLen());
 		}		
 	}
 }
@@ -1175,9 +1168,8 @@ bool SexyAppBase::WriteBytesToFile(const std::string& theFileName, const void *t
 	}	
 
 	MkDir(GetFileDir(theFileName));
-	FILE* aFP = fcaseopen(theFileName.c_str(), "w+b");
-
-	if (aFP == nullptr)
+	std::ofstream aFile(PathFromU8(theFileName), std::ios::out | std::ios::binary | std::ios::trunc);
+	if (!aFile)
 	{
 		if (mRecordingDemoBuffer)
 		{
@@ -1190,8 +1182,9 @@ bool SexyAppBase::WriteBytesToFile(const std::string& theFileName, const void *t
 		return false;
 	}
 
-	fwrite(theData, 1, theDataLen, aFP);
-	fclose(aFP);
+	aFile.write(reinterpret_cast<const char*>(theData), static_cast<std::streamsize>(theDataLen));
+	if (!aFile)
+		return false;
 
 	if (mRecordingDemoBuffer)
 	{

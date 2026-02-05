@@ -88,13 +88,13 @@ const std::string& Sexy::GetResourceFolder()
 
 void Sexy::SetResourceFolder(const std::string& thePath)
 {
-	Sexy::gResourceFolder = thePath;
-	Sexy::gResourceFolderStr = Sexy::gResourceFolder.string();
+	Sexy::gResourceFolder = PathFromU8(thePath);
+	Sexy::gResourceFolderStr = PathToU8(Sexy::gResourceFolder);
 }
 
 std::string Sexy::GetResourcePath(const std::string& theRelativePath)
 {
-	return (Sexy::gResourceFolder / theRelativePath).string();
+	return PathToU8(Sexy::gResourceFolder / PathFromU8(theRelativePath));
 }
 
 std::string Sexy::StringToUpper(const std::string& theString)
@@ -201,7 +201,7 @@ std::string Sexy::GetCurDir()
 	std::filesystem::path cur = std::filesystem::current_path(ec);
 	if (ec)
 		return std::string();
-	return cur.string();
+	return PathToU8(cur);
 }
 
 std::string Sexy::GetFullPath(const std::string& theRelPath)
@@ -211,22 +211,22 @@ std::string Sexy::GetFullPath(const std::string& theRelPath)
 
 std::string Sexy::GetPathFrom(const std::string& theRelPath, const std::string& theDir)
 {
-	std::filesystem::path relPath(theRelPath);
+	std::filesystem::path relPath = PathFromU8(theRelPath);
 	if (relPath.is_absolute() || relPath.has_root_name())
-		return relPath.lexically_normal().generic_string();
+		return PathToU8(relPath.lexically_normal());
 
 	std::filesystem::path baseDir;
 	if (!theDir.empty())
-		baseDir = std::filesystem::path(theDir);
+		baseDir = PathFromU8(theDir);
 	else
 	{
 		std::error_code ec;
 		baseDir = std::filesystem::current_path(ec);
 		if (ec)
-			return relPath.lexically_normal().generic_string();
+			return PathToU8(relPath.lexically_normal());
 	}
 
-	return (baseDir / relPath).lexically_normal().generic_string();
+	return PathToU8((baseDir / relPath).lexically_normal());
 }
 
 bool Sexy::AllowAllAccess(const std::string& theFileName)
@@ -237,7 +237,7 @@ bool Sexy::AllowAllAccess(const std::string& theFileName)
 bool Sexy::Deltree(const std::string& thePath)
 {
 	std::error_code ec;
-	std::filesystem::path path(thePath);
+	std::filesystem::path path = PathFromU8(thePath);
 	if (!std::filesystem::exists(path, ec))
 		return false;
 
@@ -248,35 +248,35 @@ bool Sexy::Deltree(const std::string& thePath)
 bool Sexy::FileExists(const std::string& theFileName)
 {
 	std::error_code ec;
-	return std::filesystem::exists(theFileName, ec);
+	return std::filesystem::exists(PathFromU8(theFileName), ec);
 }
 
 void Sexy::MkDir(const std::string& theDir)
 {
 	std::error_code ec;
-	std::filesystem::create_directories(theDir, ec);
+	std::filesystem::create_directories(PathFromU8(theDir), ec);
 }
 
 std::string Sexy::GetFileName(const std::string& thePath, bool noExtension)
 {
-	std::filesystem::path path(thePath);
+	std::filesystem::path path = PathFromU8(thePath);
 	if (!path.has_filename())
 		return "";
 
 	if (noExtension)
-		return path.stem().string();
+		return PathToU8(path.stem());
 
-	return path.filename().string();
+	return PathToU8(path.filename());
 }
 
 std::string Sexy::GetFileDir(const std::string& thePath, bool withSlash)
 {
-	std::filesystem::path path(thePath);
+	std::filesystem::path path = PathFromU8(thePath);
 	std::filesystem::path parent = path.parent_path();
 	if (parent.empty())
 		return "";
 
-	std::string result = parent.generic_string();
+	std::string result = PathToU8(parent);
 	if (withSlash && !result.empty())
 		result += '/';
 
@@ -288,7 +288,7 @@ std::string Sexy::RemoveTrailingSlash(const std::string& theDirectory)
 	if (theDirectory.empty())
 		return theDirectory;
 
-	return std::filesystem::path(theDirectory).lexically_normal().generic_string();
+	return PathToU8(PathFromU8(theDirectory).lexically_normal());
 }
 std::string Sexy::VFormat(const char* fmt, va_list argPtr) 
 {
