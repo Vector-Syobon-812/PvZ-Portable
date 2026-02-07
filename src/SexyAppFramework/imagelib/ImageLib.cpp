@@ -8,6 +8,8 @@
 #include <array>
 #include <cctype>
 #include <string_view>
+#include <mutex>
+#include <unordered_set>
 #include "paklib/PakInterface.h"
 
 extern "C"
@@ -1329,6 +1331,9 @@ static bool EqualsIgnoreCase(std::string_view theLeft, std::string_view theRight
 	return true;
 }
 
+static std::mutex gMissingDirMutex;
+static std::unordered_set<std::string> gMissingDirCache;
+
 static bool CheckSinglePath(std::string_view thePath)
 {
 	if (thePath.empty())
@@ -1346,7 +1351,29 @@ static bool CheckSinglePath(std::string_view thePath)
 	{
 		const auto& aResourceBase = Sexy::GetResourceFolder();
 		if (!aResourceBase.empty())
-			return Sexy::FileExists(Sexy::GetResourcePath(aPathString));
+		{
+			const std::string aDir = Sexy::GetFileDir(aPathString);
+			if (!aDir.empty())
+			{
+				std::scoped_lock lock(gMissingDirMutex);
+				if (gMissingDirCache.contains(aDir))
+					return false;
+			}
+
+			if (Sexy::FileExists(Sexy::GetResourcePath(aPathString)))
+				return true;
+
+			if (!aDir.empty())
+			{
+				if (!Sexy::FileExists(Sexy::GetResourcePath(aDir)))
+				{
+					std::scoped_lock lock(gMissingDirMutex);
+					gMissingDirCache.insert(aDir);
+				}
+			}
+
+			return false;
+		}
 	}
 
 	return Sexy::FileExists(aPathString);

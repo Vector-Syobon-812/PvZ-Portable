@@ -112,7 +112,7 @@ void SexyMemAddTrack(void *addr,  int asize,  const char* fname, int lnum)
 	if (!gSexyAllocMapValid)
 		return;
 
-	std::lock_guard<std::mutex> aCrit(gSexyAllocMap.mCrit);
+	std::scoped_lock aCrit(gSexyAllocMap.mCrit);
 	gShowLeaks = true;
 
 	SEXY_ALLOC_INFO &info = gSexyAllocMap[addr];
@@ -128,7 +128,7 @@ void SexyMemRemoveTrack(void* addr)
 	if (!gSexyAllocMapValid)
 		return;
 
-	std::lock_guard<std::mutex> aCrit(gSexyAllocMap.mCrit);
+	std::scoped_lock aCrit(gSexyAllocMap.mCrit);
 	SexyAllocMap::iterator anItr = gSexyAllocMap.find(addr);
 	if (anItr != gSexyAllocMap.end())
 		gSexyAllocMap.erase(anItr);
@@ -141,7 +141,7 @@ void SexyDumpUnfreed()
 	if (!gSexyAllocMapValid)
 		return;
 
-	std::lock_guard<std::mutex> aCrit(gSexyAllocMap.mCrit);
+	std::scoped_lock aCrit(gSexyAllocMap.mCrit);
 	SexyAllocMap::iterator i;
 	int totalSize = 0;
 	char buf[8192];

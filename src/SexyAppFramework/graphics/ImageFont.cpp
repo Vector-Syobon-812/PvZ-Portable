@@ -1574,7 +1574,7 @@ static RenderCommand* gRenderHead[256];
 
 void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, const std::string& theString, const Color& theColor, RectList* theDrawnAreas, int* theWidth)
 {
-	std::lock_guard<std::mutex> anAutoCrit(gRenderCritSec);
+	std::scoped_lock anAutoCrit(gRenderCritSec);
 
 	int aPoolIdx;
 

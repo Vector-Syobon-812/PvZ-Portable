@@ -1293,14 +1293,14 @@ void GLInterface::SetDrawMode(int theDrawMode)
 
 void GLInterface::AddGLImage(GLImage* theGLImage)
 {
-	std::lock_guard<std::mutex> anAutoCrit(mCritSect);
+	std::scoped_lock anAutoCrit(mCritSect);
 
 	mGLImageSet.insert(theGLImage);
 }
 
 void GLInterface::RemoveGLImage(GLImage* theGLImage)
 {
-	std::lock_guard<std::mutex> anAutoCrit(mCritSect);
+	std::scoped_lock anAutoCrit(mCritSect);
 
 	GLImageSet::iterator anItr = mGLImageSet.find(theGLImage);
 	if (anItr != mGLImageSet.end())
@@ -1314,7 +1314,7 @@ void GLInterface::Remove3DData(MemoryImage* theImage)
 		delete (TextureData*)theImage->mD3DData;
 		theImage->mD3DData = nullptr;
 
-		std::lock_guard<std::mutex> aCrit(mCritSect); // Make images thread safe
+		std::scoped_lock aCrit(mCritSect); // Make images thread safe
 		mImageSet.erase(theImage);
 	}
 }
@@ -1488,7 +1488,7 @@ bool GLInterface::CreateImageTexture(MemoryImage *theImage)
 		// The actual purging was deferred
 		wantPurge = theImage->mPurgeBits;
 
-		std::lock_guard<std::mutex> aCrit(mCritSect); // Make images thread safe
+		std::scoped_lock aCrit(mCritSect); // Make images thread safe
 		mImageSet.insert(theImage);
 	}
 

@@ -2014,7 +2014,7 @@ void SexyAppBase::DeleteNativeImageData()
 {
 	std::vector<MemoryImage*> imagesToProcess;
 	{
-		std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
 		MemoryImageSet::iterator anItr = mMemoryImageSet.begin();
 		while (anItr != mMemoryImageSet.end())
 		{
@@ -2031,7 +2031,7 @@ void SexyAppBase::DeleteExtraImageData()
 {
 	std::vector<MemoryImage*> imagesToProcess;
 	{
-		std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
 		MemoryImageSet::iterator anItr = mMemoryImageSet.begin();
 		while (anItr != mMemoryImageSet.end())
 		{
@@ -2048,7 +2048,7 @@ void SexyAppBase::ReInitImages()
 {
 	std::vector<MemoryImage*> imagesToProcess;
 	{
-		std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
 		MemoryImageSet::iterator anItr = mMemoryImageSet.begin();
 		while (anItr != mMemoryImageSet.end())
 		{
@@ -3706,14 +3706,14 @@ void SexyAppBase::SetMasterVolume(double theMasterVolume)
 
 void SexyAppBase::AddMemoryImage(MemoryImage* theMemoryImage)
 {
-	std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);
+	std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
 	mMemoryImageSet.insert(theMemoryImage);
 }
 
 void SexyAppBase::RemoveMemoryImage(MemoryImage* theMemoryImage)
 {
 	{
-		std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
 		MemoryImageSet::iterator anItr = mMemoryImageSet.find(theMemoryImage);
 		if (anItr != mMemoryImageSet.end())
 			mMemoryImageSet.erase(anItr);
@@ -3776,7 +3776,7 @@ SharedImageRef SexyAppBase::SetSharedImage(const std::string& theFileName, const
 	SharedImageRef aSharedImageRef;
 	
 	{
-		std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
 		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
 		aSharedImageRef = &aResultPair.first->second;
 	}
@@ -3801,7 +3801,7 @@ SharedImageRef SexyAppBase::GetSharedImage(const std::string& theFileName, const
 	SharedImageRef aSharedImageRef;
 
 	{
-		std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);	
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);	
 		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
 		aSharedImageRef = &aResultPair.first->second;
 	}
@@ -3825,7 +3825,7 @@ void SexyAppBase::CleanSharedImages()
 {
 	std::vector<GLImage*> imagesToDelete;
 	{
-		std::lock_guard<std::mutex> anAutoCrit(mGLInterface->mCritSect);
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
 
 		if (mCleanupSharedImages.load(std::memory_order_relaxed))
 		{
