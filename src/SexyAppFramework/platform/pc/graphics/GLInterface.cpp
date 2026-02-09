@@ -614,12 +614,12 @@ void TextureData::CreateTextures(MemoryImage *theImage)
 
 	// Release texture if image size has changed
 	bool createTextures = false;
-	if (mWidth!=theImage->mWidth || mHeight!=theImage->mHeight || aFormat!=mPixelFormat || theImage->mD3DFlags!=mImageFlags)
+	if (mWidth!=theImage->mWidth || mHeight!=theImage->mHeight || aFormat!=mPixelFormat || (theImage->mD3DFlags & D3DImageFlag_TextureMask)!=mImageFlags)
 	{
 		ReleaseTextures();
 
 		mPixelFormat = aFormat;
-		mImageFlags = theImage->mD3DFlags;
+		mImageFlags = theImage->mD3DFlags & D3DImageFlag_TextureMask;
 		CreateTextureDimensions(theImage);
 		createTextures = true;
 	}
@@ -662,7 +662,7 @@ void TextureData::CreateTextures(MemoryImage *theImage)
 ///////////////////////////////////////////////////////////////////////////////
 void TextureData::CheckCreateTextures(MemoryImage *theImage)
 {
-	if(mPixelFormat==PixelFormat_Unknown || theImage->mWidth != mWidth || theImage->mHeight != mHeight || theImage->mBitsChangedCount != mBitsChangedCount || theImage->mD3DFlags != mImageFlags)
+	if(mPixelFormat==PixelFormat_Unknown || theImage->mWidth != mWidth || theImage->mHeight != mHeight || theImage->mBitsChangedCount != mBitsChangedCount || (theImage->mD3DFlags & D3DImageFlag_TextureMask) != mImageFlags)
 		CreateTextures(theImage);
 }
 
@@ -1402,8 +1402,9 @@ bool GLInterface::RecoverBits(MemoryImage* theImage)
 	if (aData->mBitsChangedCount != theImage->mBitsChangedCount) // bits have changed since texture was created
 		return false;
 
-	printf("recover\n");
-	fflush(stdout);
+	uint32_t* aDest = theImage->GetBits();
+	int aImageWidth = theImage->mWidth;
+
 	for (int aPieceRow = 0; aPieceRow < aData->mTexVecHeight; aPieceRow++)
 	{
 		for (int aPieceCol = 0; aPieceCol < aData->mTexVecWidth; aPieceCol++)
@@ -1418,7 +1419,17 @@ bool GLInterface::RecoverBits(MemoryImage* theImage)
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, aPiece->mTexture);
 
-			glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, theImage->GetBits());
+			// Read entire texture piece into a temporary buffer
+			std::vector<uint32_t> aTempBuf(aPiece->mWidth * aPiece->mHeight);
+			glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, aTempBuf.data());
+
+			// Copy relevant portion to correct position in image buffer
+			for (int row = 0; row < aHeight; row++)
+			{
+				uint32_t* aSrc = &aTempBuf[row * aPiece->mWidth];
+				uint32_t* aDstRow = &aDest[(offy + row) * aImageWidth + offx];
+				memcpy(aDstRow, aSrc, aWidth * sizeof(uint32_t));
+			}
 		}
 	}
 
