@@ -5343,7 +5343,8 @@ void Challenge::TreeOfWisdomDraw(Graphics* g)
 
 		g->DrawImage(Sexy::IMAGE_STORE_SPEECHBUBBLE2, aPosX, aPosY);
 		std::string aText = StrFormat("[TREE_OF_WISDOM_%d]", mTreeOfWisdomTalkIndex);
-		TodDrawStringWrapped(g, aText, Rect(aPosX + 25, aPosY + 6, 233, 144), Sexy::FONT_BRIANNETOD16, Color::Black, DS_ALIGN_CENTER_VERTICAL_MIDDLE);
+		auto aWrapEnum = static_cast<DrawStringJustification>(mApp->GetInteger("TREE_OF_WISDOM_TEXT_WRAP_ENUM", DS_ALIGN_CENTER_VERTICAL_MIDDLE));
+		TodDrawStringWrapped(g, aText, Rect(aPosX + 25, aPosY + 6, 233, 144), Sexy::FONT_BRIANNETOD16, Color::Black, aWrapEnum);
 	}
 
 	int aCurSize = aHeight;
