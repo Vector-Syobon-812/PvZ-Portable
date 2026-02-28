@@ -359,8 +359,11 @@ int TodDrawStringWrappedHelper(Graphics* g, const std::string& theText, const Re
 			aCurPos = aCharStart + 1;
 			continue;
 		}
+		if (aCurChar == U'\r')  // skip CR for CRLF/LF compatibility
+			continue;
 		size_t aCharEnd = aCurPos;
-		bool aIsNewline = (aCurChar == U'\n');
+		bool aIsNewline = (aCurChar == U'\n') &&
+			!TestBit(aCurrentFormat.mFormatFlags, TodStringFormatFlag::TOD_FORMAT_IGNORE_NEWLINES);
 		bool aIsSpace = !aIsNewline && (aCurChar == U' ' ||
 			(aCurChar < 0x80 && CharIsSpaceInFormat(static_cast<char>(aCurChar), aCurrentFormat)));
 
@@ -380,14 +383,17 @@ int TodDrawStringWrappedHelper(Graphics* g, const std::string& theText, const Re
 		}
 
 		aCurWidth += (*aCurrentFormat.mNewFont)->CharWidthKern(aCurChar, aPrevChar);
-		aPrevChar = aCurChar;
 
-		if (!aIsSpace && !aIsNewline && Sexy::IsAutoBreakChar(aCurChar))
+		if (!aIsSpace && !aIsNewline && Sexy::IsAutoBreakChar(aCurChar) &&
+			!Sexy::IsClosingPunctuation(aCurChar) &&
+			aCharStart > aLineFeedPos &&
+			!Sexy::IsOpeningPunctuation(aPrevChar))
 		{
-			aBreakDrawLen = aCharEnd - aLineFeedPos;
-			aBreakResumePos = aCharEnd;
+			aBreakDrawLen = aCharStart - aLineFeedPos;
+			aBreakResumePos = aCharStart;
 			aBreakSkipSpaces = false;
 		}
+		aPrevChar = aCurChar;
 
 		if (aCurWidth > theRect.mWidth)
 		{

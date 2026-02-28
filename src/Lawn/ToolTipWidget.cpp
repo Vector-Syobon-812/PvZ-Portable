@@ -28,6 +28,7 @@ void ToolTipWidget::GetLines(std::vector<std::string>& theLines)
 	int aLineWidth = 0;
 	size_t aLineStart = 0;
 	size_t aCurPos = 0;
+	char32_t aPrevChar = 0;
 
 	int aBreakDrawLen = -1;
 	size_t aBreakResumePos = 0;
@@ -41,6 +42,8 @@ void ToolTipWidget::GetLines(std::vector<std::string>& theLines)
 			aCurPos = aCharStart + 1;
 			continue;
 		}
+		if (aChar == U'\r')  // skip CR for CRLF/LF compatibility
+			continue;
 		size_t aCharEnd = aCurPos;
 
 		if (aChar == U'\n')
@@ -49,6 +52,7 @@ void ToolTipWidget::GetLines(std::vector<std::string>& theLines)
 			aLineWidth = 0;
 			aLineStart = aCharEnd;
 			aBreakDrawLen = -1;
+			aPrevChar = 0;
 			continue;
 		}
 
@@ -59,11 +63,15 @@ void ToolTipWidget::GetLines(std::vector<std::string>& theLines)
 			aBreakDrawLen = aCharStart - aLineStart;
 			aBreakResumePos = aCharEnd;
 		}
-		else if (Sexy::IsAutoBreakChar(aChar))
+		else if (Sexy::IsAutoBreakChar(aChar) &&
+			!Sexy::IsClosingPunctuation(aChar) &&
+			aCharStart > aLineStart &&
+			!Sexy::IsOpeningPunctuation(aPrevChar))
 		{
-			aBreakDrawLen = aCharEnd - aLineStart;
-			aBreakResumePos = aCharEnd;
+			aBreakDrawLen = aCharStart - aLineStart;
+			aBreakResumePos = aCharStart;
 		}
+		aPrevChar = aChar;
 
 		if (aLineWidth >= mGetsLinesWidth)
 		{
@@ -83,6 +91,7 @@ void ToolTipWidget::GetLines(std::vector<std::string>& theLines)
 			aLineStart = aCurPos;
 			aLineWidth = 0;
 			aBreakDrawLen = -1;
+			aPrevChar = 0;
 		}
 	}
 

@@ -1235,6 +1235,8 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 			aCurPos = aCharStart + 1;
 			continue;
 		}
+		if (aCurChar == U'\r')  // skip CR for CRLF/LF compatibility
+			continue;
 		size_t aCharEnd = aCurPos;
 
 		bool aIsNewline = (aCurChar == U'\n');
@@ -1255,14 +1257,17 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 		}
 
 		aCurWidth += aFont->CharWidthKern(aCurChar, aPrevChar);
-		aPrevChar = aCurChar;
 
-		if (!aIsSpace && !aIsNewline && Sexy::IsAutoBreakChar(aCurChar))
+		if (!aIsSpace && !aIsNewline && Sexy::IsAutoBreakChar(aCurChar) &&
+			!Sexy::IsClosingPunctuation(aCurChar) &&
+			aCharStart > aLineStartPos &&
+			!Sexy::IsOpeningPunctuation(aPrevChar))
 		{
-			aBreakDrawLen = aCharEnd - aLineStartPos;
-			aBreakResumePos = aCharEnd;
+			aBreakDrawLen = aCharStart - aLineStartPos;
+			aBreakResumePos = aCharStart;
 			aBreakSkipSpaces = false;
 		}
+		aPrevChar = aCurChar;
 
 		if(aCurWidth > theRect.mWidth) // need to wrap
 		{
