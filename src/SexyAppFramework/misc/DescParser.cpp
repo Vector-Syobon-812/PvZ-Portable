@@ -1,5 +1,5 @@
 #include "DescParser.h"
-#include "paklib/PakInterface.h"
+#include "SexyAppBase.h"
 
 using namespace Sexy;
 
@@ -431,13 +431,18 @@ bool DescParser::LoadDescriptor(const std::string& theFileName)
 	//mError.erase();
 	//mError.erase(mError.begin());
 
-	PFILE *aStream = p_fopen(theFileName.c_str(),"r");
-	if (aStream==nullptr)
-		return false;	
+	std::string aFileContent;
 
+	if (!gSexyAppBase->ReadUTF8StringFromFile(theFileName, &aFileContent))
+	{
+		Error("Failed to open file");
+		return false;
+	}
+
+	size_t aIndex = 0;
 	char aBuffChar = 0;
 
-	while (!p_feof(aStream))
+	while (aIndex < aFileContent.size())
 	{		
 		int aChar;
 						
@@ -457,9 +462,9 @@ bool DescParser::LoadDescriptor(const std::string& theFileName)
 			}
 			else
 			{
-				aChar = p_fgetc(aStream);
-				if (aChar==EOF)
+				if (aIndex >= aFileContent.size())
 					break;
+				aChar = aFileContent[aIndex++];
 			}
 			
 			if (aChar != '\r')
@@ -547,6 +552,5 @@ bool DescParser::LoadDescriptor(const std::string& theFileName)
 	//mCurrentLine.erase();
 	mCurrentLineNum = 0;
 
-	p_fclose(aStream);
 	return !hasErrors;
 }

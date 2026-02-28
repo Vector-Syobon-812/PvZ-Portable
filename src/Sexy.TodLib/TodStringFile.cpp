@@ -126,32 +126,14 @@ bool TodStringListReadItems(const char* theFileText)
 //0x519240
 bool TodStringListReadFile(const char* theFileName)
 {
-	PFILE* pFile = p_fopen(theFileName, "rb");
-	if (pFile == nullptr)
+	std::string aFileContent;
+	if (!gSexyAppBase->ReadUTF8StringFromFile(theFileName, &aFileContent))
 	{
 		TodTrace("Failed to open '%s'", theFileName);
 		return false;
 	}
 
-	p_fseek(pFile, 0, SEEK_END);  // 指针调整至文件末尾
-	int aSize = p_ftell(pFile);  // 当前位置即为文件长度
-	p_fseek(pFile, 0, SEEK_SET);  // 指针调回文件开头
-	char* aFileText = new char[aSize + 1];
-	bool aSuccess = true;
-	if (p_fread(aFileText, sizeof(char), aSize, pFile) <= 0)  // 按字节读取数据
-	{
-		TodTrace("Failed to read '%s'", theFileName);
-		aSuccess = false;
-	}
-	aFileText[aSize] = '\0';
-	if (aSuccess)
-	{
-		aSuccess = TodStringListReadItems(aFileText);
-	}
-	p_fclose(pFile);  // 关闭文件流
-	delete[] aFileText;
-
-	return aSuccess;
+	return TodStringListReadItems(aFileContent.c_str());
 }
 
 //0x519390

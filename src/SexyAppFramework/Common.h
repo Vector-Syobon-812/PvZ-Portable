@@ -162,6 +162,52 @@ inline void			inlineTrim(std::string &theData, const std::string& theChars = " \
 	inlineLTrim(theData, theChars);
 }
 
+// Decode next UTF-8 codepoint, advancing theOffset. Returns false on end/error.
+inline bool UTF8DecodeNext(const std::string& theString, size_t& theOffset, char32_t& theOutChar)
+{
+	if (theOffset >= theString.size())
+		return false;
+
+	unsigned char aFirst = static_cast<unsigned char>(theString[theOffset]);
+	if (aFirst < 0x80)
+	{
+		theOutChar = aFirst;
+		theOffset += 1;
+		return true;
+	}
+
+	size_t aLength;
+	if ((aFirst & 0xE0) == 0xC0) aLength = 2;
+	else if ((aFirst & 0xF0) == 0xE0) aLength = 3;
+	else if ((aFirst & 0xF8) == 0xF0) aLength = 4;
+	else return false;
+
+	if (theOffset + aLength > theString.size())
+		return false;
+
+	for (size_t i = 1; i < aLength; i++)
+		if ((static_cast<unsigned char>(theString[theOffset + i]) & 0xC0) != 0x80)
+			return false;
+
+	char32_t aValue = 0;
+	if (aLength == 2)
+		aValue = ((aFirst & 0x1F) << 6) |
+			(static_cast<unsigned char>(theString[theOffset + 1]) & 0x3F);
+	else if (aLength == 3)
+		aValue = ((aFirst & 0x0F) << 12) |
+			((static_cast<unsigned char>(theString[theOffset + 1]) & 0x3F) << 6) |
+			(static_cast<unsigned char>(theString[theOffset + 2]) & 0x3F);
+	else
+		aValue = ((aFirst & 0x07) << 18) |
+			((static_cast<unsigned char>(theString[theOffset + 1]) & 0x3F) << 12) |
+			((static_cast<unsigned char>(theString[theOffset + 2]) & 0x3F) << 6) |
+			(static_cast<unsigned char>(theString[theOffset + 3]) & 0x3F);
+
+	theOutChar = aValue;
+	theOffset += aLength;
+	return true;
+}
+
 // UTF-8 path conversion helpers for Windows Unicode path support
 #ifdef _WIN32
 inline std::filesystem::path PathFromU8(const std::string& s)

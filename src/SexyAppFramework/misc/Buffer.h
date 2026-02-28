@@ -39,7 +39,7 @@ public:
 	void					SetData(uchar* thePtr, int theCount);
 
 	std::string				ToWebString() const;
-	std::string			UTF8ToString() const;
+	bool					ToUTF8String(std::string* theString) const;
 	uchar					ReadByte() const;
 	int						ReadNumBits(int theBits, bool isSigned) const;
 	bool					ReadBoolean() const;
