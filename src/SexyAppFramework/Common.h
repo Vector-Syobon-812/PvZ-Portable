@@ -208,6 +208,23 @@ inline bool UTF8DecodeNext(const std::string& theString, size_t& theOffset, char
 	return true;
 }
 
+// Characters that allow line-break before/after without whitespace.
+inline bool IsAutoBreakChar(char32_t theChar)
+{
+	return (theChar >= 0x2600 && theChar <= 0x27BF) ||  // Misc Symbols, Dingbats
+	       (theChar >= 0x3000 && theChar <= 0x303F) ||  // CJK Symbols and Punctuation
+	       (theChar >= 0x3040 && theChar <= 0x309F) ||  // Hiragana
+	       (theChar >= 0x30A0 && theChar <= 0x30FF) ||  // Katakana
+	       (theChar >= 0x3400 && theChar <= 0x4DBF) ||  // CJK Extension A
+	       (theChar >= 0x4E00 && theChar <= 0x9FFF) ||  // CJK Unified Ideographs
+	       (theChar >= 0xAC00 && theChar <= 0xD7AF) ||  // Hangul Syllables
+	       (theChar >= 0xF900 && theChar <= 0xFAFF) ||  // CJK Compatibility Ideographs
+	       (theChar >= 0xFE30 && theChar <= 0xFE4F) ||  // CJK Compatibility Forms
+	       (theChar >= 0xFF01 && theChar <= 0xFF60) ||  // Fullwidth Forms
+	       (theChar >= 0x1F300 && theChar <= 0x1FAFF) || // Emoji Symbols & Pictographs
+	       (theChar >= 0x20000 && theChar <= 0x2FA1F);  // CJK Extension B-F & Supplements
+}
+
 // UTF-8 path conversion helpers for Windows Unicode path support
 #ifdef _WIN32
 inline std::filesystem::path PathFromU8(const std::string& s)

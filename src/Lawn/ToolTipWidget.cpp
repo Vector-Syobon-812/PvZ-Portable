@@ -19,45 +19,76 @@ ToolTipWidget::ToolTipWidget()
 	mMaxBottom = BOARD_HEIGHT;
 	mGetsLinesWidth = 0;
 	mWarningFlashCounter = 0;
+	mMaxLinesWidth = 0;
 }
 
 //0x51A530
 void ToolTipWidget::GetLines(std::vector<std::string>& theLines)
 {
 	int aLineWidth = 0;
-	unsigned int aIndexStart = 0;
-	unsigned int aIndexInLine = 0;
+	size_t aLineStart = 0;
+	size_t aCurPos = 0;
 
-	while (aIndexInLine != mLabel.size())
+	int aBreakDrawLen = -1;
+	size_t aBreakResumePos = 0;
+
+	while (aCurPos < mLabel.size())
 	{
-		while (aIndexInLine < mLabel.size() && mLabel[aIndexInLine] != ' ' && mLabel[aIndexInLine] != '\n')
+		size_t aCharStart = aCurPos;
+		char32_t aChar;
+		if (!Sexy::UTF8DecodeNext(mLabel, aCurPos, aChar))
 		{
-			aLineWidth += FONT_PICO129->CharWidth(mLabel[aIndexInLine]);
-			aIndexInLine++;
+			aCurPos = aCharStart + 1;
+			continue;
 		}
+		size_t aCharEnd = aCurPos;
 
-		if (aIndexInLine != mLabel.size() && aLineWidth < mGetsLinesWidth && mLabel[aIndexInLine] != '\n')
+		if (aChar == U'\n')
 		{
-			aLineWidth += FONT_PICO129->CharWidth(mLabel[aIndexInLine]);
-			aIndexInLine++;
-		}
-		else
-		{
-			std::string aLine = mLabel.substr(aIndexStart, aIndexInLine - aIndexStart);
+			theLines.push_back(mLabel.substr(aLineStart, aCharStart - aLineStart));
 			aLineWidth = 0;
-			theLines.push_back(aLine);
-
-			if (aIndexInLine < mLabel.size() && mLabel[aIndexInLine] == '\n')
-			{
-				aIndexInLine++;
-			}
-			while (aIndexInLine < mLabel.size() && mLabel[aIndexInLine] == ' ')
-			{
-				aIndexInLine++;
-			}
-
-			aIndexStart = aIndexInLine;
+			aLineStart = aCharEnd;
+			aBreakDrawLen = -1;
+			continue;
 		}
+
+		aLineWidth += FONT_PICO129->CharWidth(aChar);
+
+		if (aChar == U' ')
+		{
+			aBreakDrawLen = aCharStart - aLineStart;
+			aBreakResumePos = aCharEnd;
+		}
+		else if (Sexy::IsAutoBreakChar(aChar))
+		{
+			aBreakDrawLen = aCharEnd - aLineStart;
+			aBreakResumePos = aCharEnd;
+		}
+
+		if (aLineWidth >= mGetsLinesWidth)
+		{
+			if (aBreakDrawLen >= 0)
+			{
+				theLines.push_back(mLabel.substr(aLineStart, aBreakDrawLen));
+				aCurPos = aBreakResumePos;
+				while (aCurPos < mLabel.size() && mLabel[aCurPos] == ' ')
+					aCurPos++;
+			}
+			else
+			{
+				size_t aDrawEnd = (aCharEnd > aLineStart) ? aCharEnd : aCharStart + 1;
+				theLines.push_back(mLabel.substr(aLineStart, aDrawEnd - aLineStart));
+				aCurPos = aDrawEnd;
+			}
+			aLineStart = aCurPos;
+			aLineWidth = 0;
+			aBreakDrawLen = -1;
+		}
+	}
+
+	if (aLineStart < mLabel.size())
+	{
+		theLines.push_back(mLabel.substr(aLineStart));
 	}
 }
 
@@ -71,6 +102,8 @@ void ToolTipWidget::CalculateSize()
 	int aMaxWidth = std::max(aTitleWidth, aWarningWidth);
 
 	mGetsLinesWidth = std::max(aMaxWidth - 30, 100);
+	if (mMaxLinesWidth > 0)
+		mGetsLinesWidth = std::min(mGetsLinesWidth, mMaxLinesWidth);
 	GetLines(aLines);
 
 	for (size_t i = 0; i < aLines.size(); i++)
