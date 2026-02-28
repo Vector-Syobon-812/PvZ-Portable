@@ -104,7 +104,7 @@ bool XMLParser::GetAsciiChar(char* theChar, bool* error)
 
 bool XMLParser::GetUTF8Char(char* theChar, bool* error)
 {
-	*error = true;
+	(void)error; // EOF is not an encoding error
 	unsigned char aChar = 0;
 	if (p_fread(&aChar, 1, 1, mFile) != 1) return false;
 
@@ -126,7 +126,6 @@ bool XMLParser::GetUTF8Char(char* theChar, bool* error)
 	}
 
 	*theChar = (char)aChar;
-	*error = false;
 	return true;
 }
 
@@ -576,7 +575,7 @@ bool XMLParser::NextElement(XMLElement* theElement)
 							if ((theElement->mType == XMLElement::TYPE_START) && (theElement->mValue == "!--"))
 								theElement->mType = XMLElement::TYPE_COMMENT;
 						}
-						else if (c > 32)
+						else if ((uchar) c > 32)
 						{
 							processChar = true;
 						}
