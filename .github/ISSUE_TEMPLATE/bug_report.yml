@@ -85,6 +85,8 @@ body:
       options:
         - "1.2.0.1073 (Origin / PopCap GOTY)"
         - "1.2.0.1096 (Steam GOTY)"
+        - "1.1.0.1056 (Chinese GOTY based on 1.2.0.1073)"
+        - "1.2.0.1093 (German/Spanish/French/Italian GOTY)"
         - Extracted / unpacked data
         - Unknown / Other
     validations:
