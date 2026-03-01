@@ -39,6 +39,7 @@ This project is **based on** [Patoke](https://github.com/Patoke/re-plants-vs-zom
 - [x] Implement with `std::thread` for cross-platform threading support
 - [x] Implement with `std::filesystem` for cross-platform file system support
 - [x] Replace wide-string with `std::string` and UTF-8 encoding
+- [x] **Multilingual Support**: Supports game resource data from official GOTY editions in various languages, including **Chinese, German, Spanish, French, and Italian**.
 - [x] 32 and 64-bit builds support
 - [x] Different CPU architectures support (i686, x86_64, aarch64, riscv64, loongarch64, etc.)
 - [x] Unicode path support on all platforms
@@ -81,7 +82,7 @@ You can customize these paths via command-line parameters:
 
 ## Game Version Compatibility
 
-This project is designed and tested against Plants vs. Zombies **GOTY Edition 1.2.0.1073** EN (the standalone PopCap release). **Non-English GOTY editions** (1.2.0.1073-1.1.0.1056 ZH or 1.2.0.1093 DE/ES/FR/IT) and the **Steam GOTY Edition 1.2.0.1096** are also fully playable — all game mechanics work correctly. The only differences are minor cosmetic UI text issues caused by renamed string keys across versions, and these can be **easily fixed** by the user via a custom `properties/default.xml` (see below).
+This project is designed and tested against Plants vs. Zombies **GOTY Edition 1.2.0.1073** EN (the standalone PopCap release). **Non-English GOTY editions** (1.2.0.1093 DE/ES/FR/IT or 1.1.0.1056 ZH based on 1.2.0.1073) and the **Steam GOTY Edition 1.2.0.1096** are also fully playable — all game mechanics work correctly. The only differences are minor cosmetic UI text issues caused by renamed string keys across versions, and these can be **easily fixed** by the user via a custom `properties/default.xml` (see below).
 
 **Recommendation:** use the **1.2.0.1073 EN** asset package for the best **out-of-box** experience.
 
