@@ -136,7 +136,8 @@ void AchievementsWidget::Draw(Graphics* g) {
 		g->SetFont(FONT_DWARVENTODCRAFT15);
 		g->SetColor(Color(21, 175, 0));
 
-		g->DrawString(gAchievementList[i].name, aTextXPos, aTextYPos);
+		std::string aName = mApp->GetString(gAchievementList[i].name, gAchievementList[i].name);
+		g->DrawString(aName, aTextXPos, aTextYPos);
 
 		// Achievement descriptions	
 		Rect aPos = Rect(aTextXPos, aTextYPos + 3, 212, 60);
@@ -144,7 +145,8 @@ void AchievementsWidget::Draw(Graphics* g) {
 		g->SetFont(FONT_DWARVENTODCRAFT12);
 		g->SetColor(Color(255, 255, 255));
 
-		g->WriteWordWrapped(aPos, gAchievementList[i].description, 12);
+		std::string aDesc = mApp->GetString(gAchievementList[i].description, gAchievementList[i].description);
+		g->WriteWordWrapped(aPos, aDesc, 12);
 	}
 
 	g->DrawImage(IMAGE_ACHEESEMENTS_MORE_ROCK, 700, 450);
@@ -220,11 +222,12 @@ void ReportAchievement::GiveAchievement(LawnApp* theApp, int theAchievement, boo
 	if (!theForceGive)
 		return;
 
-	std::string aAchievementName = gAchievementList[theAchievement].name;
-	aAchievementName.append(" Achievement!");
+	std::string aAchievementName = theApp->GetString(gAchievementList[theAchievement].name, gAchievementList[theAchievement].name);
+	std::string aFormat = theApp->GetString("%s Achievement!", "%s Achievement!");
+	std::string aMessage = Sexy::StrFormat(aFormat.c_str(), aAchievementName.c_str());
 
 	if (theApp->mBoard)
-		theApp->mBoard->DisplayAdvice(aAchievementName, MESSAGE_STYLE_ACHIEVEMENT, AdviceType::ADVICE_NONE);
+		theApp->mBoard->DisplayAdvice(aMessage, MESSAGE_STYLE_ACHIEVEMENT, AdviceType::ADVICE_NONE);
 	theApp->PlaySample(SOUND_ACHIEVEMENT);
 }
 

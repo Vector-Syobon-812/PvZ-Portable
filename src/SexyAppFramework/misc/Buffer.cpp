@@ -1,4 +1,5 @@
 #include "Buffer.h"
+#include <SDL_stdinc.h>
 #define POLYNOMIAL 0x04c11db7L
 
 static bool 	     bCrcTableGenerated = false;
@@ -98,11 +99,35 @@ std::string Buffer::ToWebString() const
 	return aString;
 }
 
-std::string Buffer::UTF8ToString() const
+bool Buffer::ToUTF8String(std::string* theString) const
 {
 	const char* aData = (const char*)GetDataPtr();
 	int aLen = GetDataLen();
-	return std::string(aData, aData + aLen);
+
+	if (aLen >= 3 && memcmp(aData, "\xEF\xBB\xBF", 3) == 0) {
+		// UTF-8 BOM: strip it
+		*theString = std::string(aData + 3, aLen - 3);
+		return true;
+	}
+
+	char* aStringBuffer = nullptr;
+	if (aLen >= 2 && memcmp(aData, "\xFF\xFE", 2) == 0) {
+		if ((aLen - 2) % 2 != 0) return false;
+		aStringBuffer = SDL_iconv_string("UTF-8", "UTF-16LE", aData + 2, aLen - 2);
+	} else if (aLen >= 2 && memcmp(aData, "\xFE\xFF", 2) == 0) {
+		if ((aLen - 2) % 2 != 0) return false;
+		aStringBuffer = SDL_iconv_string("UTF-8", "UTF-16BE", aData + 2, aLen - 2);
+	} else {
+		*theString = std::string(aData, aLen); // No BOM: treat as UTF-8 (covers ASCII as well)
+		return true;
+	}
+
+	if (aStringBuffer) {
+		*theString = std::string(aStringBuffer);
+		SDL_free(aStringBuffer);
+		return true;
+	}
+	return false;
 }
 
 void Buffer::FromWebString(const std::string& theString)

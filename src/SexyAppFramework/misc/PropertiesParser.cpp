@@ -248,7 +248,14 @@ bool PropertiesParser::ParsePropertiesBuffer(const Buffer& theBuffer)
 {
 	mXMLParser = new XMLParser();
 
-	mXMLParser->SetStringSource(theBuffer.UTF8ToString());
+	std::string aString;
+	if (!theBuffer.ToUTF8String(&aString))
+	{
+		Fail("Failed to convert properties buffer to UTF-8 string");
+		return false;
+	}
+
+	mXMLParser->SetStringSource(aString);
 	return DoParseProperties();
 }
 

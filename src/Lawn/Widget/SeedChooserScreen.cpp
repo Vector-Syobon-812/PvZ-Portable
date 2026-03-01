@@ -35,6 +35,7 @@ SeedChooserScreen::SeedChooserScreen()
 	mChooseState = CHOOSE_NORMAL;
 	mViewLawnTime = 0;
 	mToolTip = new ToolTipWidget();
+	mToolTip->mMaxLinesWidth = mApp->GetInteger("SEED_CHOOSER_SCREEN_TOOL_TIP_MAX_LINE_WIDTH", 0);
 	mToolTipSeed = -1;
 
 	mStartButton = new GameButton(SeedChooserScreen::SeedChooserScreen_Start);

@@ -1765,6 +1765,10 @@ void LawnApp::LoadingThreadProc()
 
 	TodStringListLoad("Properties/LawnStrings.txt");
 
+	// Load localized properties AFTER LawnStrings so they can override string values
+	LoadProperties("properties/default.xml", false, false);
+	LoadProperties("properties/Layout.xml", false, false);
+
 	if (mTitleScreen)
 	{
 		mTitleScreen->mLoaderScreenIsLoaded = true;
@@ -3115,7 +3119,8 @@ void LawnApp::DrawCrazyDave(Graphics* g)
 			clickToContinue = false;
 		}
 
-		TodDrawStringWrapped(g, aBubbleText, aRect, FONT_BRIANNETOD16, Color::Black, DrawStringJustification::DS_ALIGN_CENTER_VERTICAL_MIDDLE);
+		auto aWrapEnum = static_cast<DrawStringJustification>(GetInteger("CRAZY_DAVE_MESSAGE_TEXT_WRAP_ENUM", DS_ALIGN_CENTER_VERTICAL_MIDDLE));
+		TodDrawStringWrapped(g, aBubbleText, aRect, FONT_BRIANNETOD16, Color::Black, aWrapEnum);
 		if (clickToContinue)
 		{
 			TodDrawString(g, "click to continue", aPosX + 139, aPosY + 140, FONT_PICO129, Color::Black, DrawStringJustification::DS_ALIGN_CENTER);

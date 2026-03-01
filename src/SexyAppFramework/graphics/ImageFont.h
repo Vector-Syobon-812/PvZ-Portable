@@ -13,7 +13,7 @@ namespace Sexy
 class SexyAppBase;
 class Image;
 
-typedef std::map<char, int> CharIntMap;
+typedef std::map<char32_t, int> CharIntMap;
 
 class CharData
 {
@@ -29,7 +29,7 @@ public:
 };
 
 class FontData;
-typedef std::map<char, CharData> CharDataMap;
+typedef std::map<char32_t, CharData> CharDataMap;
 
 class FontLayer
 {
@@ -62,10 +62,10 @@ public:
 	FontLayer(FontData* theFontData);
 	FontLayer(const FontLayer& theFontLayer);
 
-	CharData*				GetCharData(char theChar);
+	CharData*				GetCharData(char32_t theChar);
 };
 
-typedef std::map<char, char> CharMap;
+typedef std::map<char32_t, char32_t> CharMap;
 typedef std::list<FontLayer> FontLayerList;
 typedef std::map<std::string, FontLayer*> FontLayerMap;
 typedef std::list<Rect> RectList;
@@ -103,7 +103,7 @@ public:
 	bool					LoadLegacy(Image* theFontImage, const std::string& theFontDescFileName);
 };
 
-typedef std::map<char, Rect> CharRectMap;
+typedef std::map<char32_t, Rect> CharRectMap;
 
 class ActiveFontLayer
 {
@@ -162,8 +162,8 @@ public:
 	ImageFont(Image* theFontImage, const std::string& theFontDescFileName);
 	//ImageFont(const ImageFont& theImageFont, Image* theImage);
 	
-	virtual int				CharWidth(char theChar);
-	virtual int				CharWidthKern(char theChar, char thePrevChar);
+	virtual int				CharWidth(char32_t theChar);
+	virtual int				CharWidthKern(char32_t theChar, char32_t thePrevChar);
 	virtual int				StringWidth(const std::string& theString);
 	virtual void			DrawString(Graphics* g, int theX, int theY, const std::string& theString, const Color& theColor, const Rect& theClipRect);
 
@@ -179,7 +179,7 @@ public:
 	virtual std::string		GetDefine(const std::string& theName);
 
 	virtual void			Prepare();
-	char				GetMappedChar(char theChar);
+	char32_t				GetMappedChar(char32_t theChar);
 };
 
 }

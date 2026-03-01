@@ -23,6 +23,7 @@ public:
     int                 mMaxBottom;             //+0x6C
     int                 mGetsLinesWidth;        //+0x70
     int                 mWarningFlashCounter;   //+0x74
+    int                 mMaxLinesWidth;         // max line width override (0 = auto)
 
 public:
     ToolTipWidget();

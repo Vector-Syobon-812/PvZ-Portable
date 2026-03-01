@@ -447,7 +447,8 @@ void ChallengeScreen::DrawButton(Graphics* g, int theChallengeIndex)
 			}
 
 			int aNameLen = aName.size();
-			if (aNameLen < 13)
+			int aAutoWrapNum = mApp->GetInteger("CHALLENGE_SCREEN_BUTTON_AUTO_WRAP_NUM", 13);
+			if (aNameLen < aAutoWrapNum)
 			{
 				TodDrawString(g, aName, aPosX + 52, aPosY + 96, Sexy::FONT_BRIANNETOD12, aTextColor, DS_ALIGN_CENTER);
 			}

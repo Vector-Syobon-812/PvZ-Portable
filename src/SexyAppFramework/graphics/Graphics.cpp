@@ -1179,13 +1179,8 @@ static int WriteWordWrappedHelper(Graphics *g, const std::string& theString, int
 
 int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, int theLineSpacing, int theJustification, int *theMaxWidth, int theMaxChars, int *theLastWidth)
 {
-	/*
-	正式版中，删去了 *theLastWidth、theMaxChars 和 *theMaxWidth 参数，此函数形式可以简化为：
-	Graphics::自动换行的文字绘制(const Rect& 绘制区域矩形, const std::string& 文字内容, int 行距 = -1, int 对齐方式 = -1)
-	当行距 = -1 时，默认使用 Graphics 字体的行距；对齐方式：左对齐 = -1；居中对齐 = 0；右对齐 = 1。
-	*/
 	Color anOrigColor = GetColor();
-	int anOrigColorInt = anOrigColor.ToInt();  //颜色数组转化为 ARGB 颜色
+	int anOrigColorInt = anOrigColor.ToInt();
 	if ((anOrigColorInt&0xFF000000)==0xFF000000)
 		anOrigColorInt &= ~0xFF000000;
 	
@@ -1194,21 +1189,22 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 
 	_Font* aFont = GetFont();						
 
-	//纵向偏移值 = 字体主要部分高度 - 字体内边距
 	int aYOffset = aFont->GetAscent() - aFont->GetAscentPadding();
 
 	if (theLineSpacing == -1)
 		theLineSpacing = aFont->GetLineSpacing();
 
-	std::string aCurString;
-	ulong aCurPos = 0;
-	int aLineStartPos = 0;
+	size_t aCurPos = 0;
+	size_t aLineStartPos = 0;
 	int aCurWidth = 0;
-	char aCurChar = 0;
-	char aPrevChar = 0;
-	int aSpacePos = -1;
+	char32_t aCurChar = 0;
+	char32_t aPrevChar = 0;
 	int aMaxWidth = 0;
 	int anIndentX = 0;
+
+	int aBreakDrawLen = -1;
+	size_t aBreakResumePos = 0;
+	bool aBreakSkipSpaces = false;
 
 	if (theLastWidth != nullptr)
 	{
@@ -1217,9 +1213,10 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 	}
 
 	while (aCurPos < theLine.length())
-	{	
-		aCurChar = theLine[aCurPos];
-		if(aCurChar=='^' && mWriteColoredString) // Handle special color modifier
+	{
+		size_t aCharStart = aCurPos;
+
+		if(theLine[aCurPos]=='^' && mWriteColoredString) // color modifier
 		{
 			if(aCurPos+1<theLine.length())
 			{
@@ -1232,31 +1229,56 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 				}
 			}
 		}
-		else if(aCurChar==' ')
-			aSpacePos = aCurPos;
-		else if(aCurChar=='\n')
+
+		if (!Sexy::UTF8DecodeNext(theLine, aCurPos, aCurChar))
+		{
+			aCurPos = aCharStart + 1;
+			continue;
+		}
+		if (aCurChar == U'\r')  // skip CR for CRLF/LF compatibility
+			continue;
+		size_t aCharEnd = aCurPos;
+
+		bool aIsNewline = (aCurChar == U'\n');
+		bool aIsSpace = !aIsNewline && (aCurChar == U' ');
+
+		if (aIsSpace)
+		{
+			aBreakDrawLen = aCharStart - aLineStartPos;
+			aBreakResumePos = aCharEnd;
+			aBreakSkipSpaces = true;
+		}
+		else if (aIsNewline)
 		{
 			aCurWidth = theRect.mWidth+1; // force word wrap
-			aSpacePos = aCurPos;
-			aCurPos++; // skip enter on next go round
+			aBreakDrawLen = aCharStart - aLineStartPos;
+			aBreakResumePos = aCharEnd;
+			aBreakSkipSpaces = false;
 		}
 
 		aCurWidth += aFont->CharWidthKern(aCurChar, aPrevChar);
+
+		if (!aIsSpace && !aIsNewline && Sexy::IsAutoBreakChar(aCurChar) &&
+			!Sexy::IsClosingPunctuation(aCurChar) &&
+			aCharStart > aLineStartPos &&
+			!Sexy::IsOpeningPunctuation(aPrevChar))
+		{
+			aBreakDrawLen = aCharStart - aLineStartPos;
+			aBreakResumePos = aCharStart;
+			aBreakSkipSpaces = false;
+		}
 		aPrevChar = aCurChar;
 
 		if(aCurWidth > theRect.mWidth) // need to wrap
 		{
 			int aWrittenWidth;
-			if(aSpacePos!=-1)
+			if(aBreakDrawLen >= 0)
 			{
-				//aWrittenWidth = WriteWordWrappedHelper(this, theLine, theRect.mX, theRect.mY + aYOffset, theRect.mWidth, 
-				//	theJustification, true, aLineStartPos, aSpacePos-aLineStartPos, anOrigColorInt, theMaxChars);
-
 				int aPhysPos = theRect.mY + aYOffset + mTransY;
 				if ((aPhysPos >= mClipRect.mY) && (aPhysPos < mClipRect.mY + mClipRect.mHeight + theLineSpacing))
 				{
 					WriteWordWrappedHelper(this, theLine, theRect.mX + anIndentX, theRect.mY + aYOffset, theRect.mWidth, 
-						theJustification, true, aLineStartPos, aSpacePos-aLineStartPos, anOrigColorInt, theMaxChars);
+						theJustification, true, aLineStartPos, aBreakDrawLen, anOrigColorInt, theMaxChars);
 				}
 
 				aWrittenWidth = aCurWidth + anIndentX;
@@ -1264,8 +1286,8 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 				if (aWrittenWidth<0)
 					break;
 
-				aCurPos = aSpacePos+1;
-				if (aCurChar != '\n')
+				aCurPos = aBreakResumePos;
+				if (aBreakSkipSpaces)
 				{
 					while (aCurPos<theLine.length() && theLine[aCurPos]==' ')
 						aCurPos++;
@@ -1274,11 +1296,12 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 			}
 			else
 			{
-				if((int)aCurPos<aLineStartPos+1)
-					aCurPos++; // ensure at least one character gets written
+				size_t aDrawEnd = aCharStart;
+				if (aDrawEnd <= aLineStartPos)
+					aDrawEnd = aCharEnd; // at least one char per line
 
 				aWrittenWidth = WriteWordWrappedHelper(this, theLine, theRect.mX + anIndentX, theRect.mY + aYOffset, theRect.mWidth, 
-					theJustification, true, aLineStartPos, aCurPos-aLineStartPos, anOrigColorInt, theMaxChars);
+					theJustification, true, aLineStartPos, aDrawEnd-aLineStartPos, anOrigColorInt, theMaxChars);
 
 				if (aWrittenWidth<0)
 					break;
@@ -1287,23 +1310,23 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 					*theMaxWidth = aWrittenWidth;
 				if (theLastWidth!=nullptr)
 					*theLastWidth = aWrittenWidth;
+
+				aCurPos = aDrawEnd;
 			}
 
 			if (aWrittenWidth > aMaxWidth)
 				aMaxWidth = aWrittenWidth;
 
 			aLineStartPos = aCurPos;
-			aSpacePos = -1;
+			aBreakDrawLen = -1;
 			aCurWidth = 0;
 			aPrevChar = 0;
 			anIndentX = 0;
 			aYOffset += theLineSpacing;
 		}
-		else
-			aCurPos++;
 	}
 
-	if(aLineStartPos<(int)theLine.length()) // write the last piece
+	if(aLineStartPos<theLine.length()) // write the last piece
 	{
 		int aWrittenWidth = WriteWordWrappedHelper(this, theLine, theRect.mX + anIndentX, theRect.mY + aYOffset, theRect.mWidth, 
 			theJustification, true, aLineStartPos, theLine.length()-aLineStartPos, anOrigColorInt, theMaxChars);
@@ -1321,7 +1344,7 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 			aYOffset += theLineSpacing;
 		}
 	}
-	else if (aCurChar == '\n')
+	else if (aCurChar == U'\n')
 	{
 		aYOffset += theLineSpacing;
 		if (theLastWidth != nullptr)
@@ -1336,7 +1359,6 @@ int	Graphics::WriteWordWrapped(const Rect& theRect, const std::string& theLine, 
 	//返回时，aYOffset 增量为 (行数 + 1) * 行距。以 aYOffset 减去末行多算的一次行距，再加上字体下沉部分的高度，得到文本底部的纵向偏移值，即文本区域高度。
 	return aYOffset + aFont->GetDescent() - theLineSpacing;
 }
-
 int	Graphics::DrawStringColor(const std::string& theLine, int theX, int theY, int theOldColor)
 {
 	return WriteString(theLine, theX, theY, -1, -1,true,0,-1,theOldColor);

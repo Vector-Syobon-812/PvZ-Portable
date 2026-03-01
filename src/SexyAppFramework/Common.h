@@ -162,6 +162,108 @@ inline void			inlineTrim(std::string &theData, const std::string& theChars = " \
 	inlineLTrim(theData, theChars);
 }
 
+// Decode next UTF-8 codepoint, advancing theOffset. Returns false on end/error.
+inline bool UTF8DecodeNext(const std::string& theString, size_t& theOffset, char32_t& theOutChar)
+{
+	if (theOffset >= theString.size())
+		return false;
+
+	unsigned char aFirst = static_cast<unsigned char>(theString[theOffset]);
+	if (aFirst < 0x80)
+	{
+		theOutChar = aFirst;
+		theOffset += 1;
+		return true;
+	}
+
+	size_t aLength;
+	if ((aFirst & 0xE0) == 0xC0) aLength = 2;
+	else if ((aFirst & 0xF0) == 0xE0) aLength = 3;
+	else if ((aFirst & 0xF8) == 0xF0) aLength = 4;
+	else return false;
+
+	if (theOffset + aLength > theString.size())
+		return false;
+
+	for (size_t i = 1; i < aLength; i++)
+		if ((static_cast<unsigned char>(theString[theOffset + i]) & 0xC0) != 0x80)
+			return false;
+
+	char32_t aValue = 0;
+	if (aLength == 2)
+		aValue = ((aFirst & 0x1F) << 6) |
+			(static_cast<unsigned char>(theString[theOffset + 1]) & 0x3F);
+	else if (aLength == 3)
+		aValue = ((aFirst & 0x0F) << 12) |
+			((static_cast<unsigned char>(theString[theOffset + 1]) & 0x3F) << 6) |
+			(static_cast<unsigned char>(theString[theOffset + 2]) & 0x3F);
+	else
+		aValue = ((aFirst & 0x07) << 18) |
+			((static_cast<unsigned char>(theString[theOffset + 1]) & 0x3F) << 12) |
+			((static_cast<unsigned char>(theString[theOffset + 2]) & 0x3F) << 6) |
+			(static_cast<unsigned char>(theString[theOffset + 3]) & 0x3F);
+
+	theOutChar = aValue;
+	theOffset += aLength;
+	return true;
+}
+
+// Opening punctuation that must not appear at end of a line
+inline bool IsOpeningPunctuation(char32_t theChar)
+{
+	switch (theChar)
+	{
+	case U'〈': case U'《': case U'「': case U'『':
+	case U'【': case U'〔': case U'〖': case U'〘':
+	case U'〚':
+	case U'（': case U'［': case U'｛':
+	case U'\u2018': case U'\u201A': case U'\u201B': case U'\u201C':  // ' ‚ ‛ "
+		return true;
+	default:
+		return false;
+	}
+}
+
+// Closing punctuation that must not appear at start of a line
+inline bool IsClosingPunctuation(char32_t theChar)
+{
+	switch (theChar)
+	{
+	case U'〉': case U'》': case U'」': case U'』':
+	case U'】': case U'〕': case U'〗': case U'〙':
+	case U'〛':
+	case U'）': case U'］': case U'｝':
+	case U'\u2019': case U'\u201D':  // ’ ”
+	case U'、': case U'。':
+	case U'，': case U'．':
+	case U'！': case U'？':
+	case U'：': case U'；':
+		return true;
+	default:
+		return false;
+	}
+}
+
+// Characters that allow auto line-break
+inline bool IsAutoBreakChar(char32_t theChar)
+{
+	if (theChar < 0x80)
+		return false;
+	return (theChar >= 0x2018 && theChar <= 0x201D) ||  // Curly quotes
+		(theChar >= 0x2600 && theChar <= 0x27BF) ||  // Misc Symbols, Dingbats
+		(theChar >= 0x3000 && theChar <= 0x303F) ||  // CJK Symbols and Punctuation
+		(theChar >= 0x3040 && theChar <= 0x309F) ||  // Hiragana
+		(theChar >= 0x30A0 && theChar <= 0x30FF) ||  // Katakana
+		(theChar >= 0x3400 && theChar <= 0x4DBF) ||  // CJK Extension A
+		(theChar >= 0x4E00 && theChar <= 0x9FFF) ||  // CJK Unified Ideographs
+		(theChar >= 0xAC00 && theChar <= 0xD7AF) ||  // Hangul Syllables
+		(theChar >= 0xF900 && theChar <= 0xFAFF) ||  // CJK Compatibility Ideographs
+		(theChar >= 0xFE30 && theChar <= 0xFE4F) ||  // CJK Compatibility Forms
+		(theChar >= 0xFF01 && theChar <= 0xFF60) ||  // Fullwidth Forms
+		(theChar >= 0x1F300 && theChar <= 0x1FAFF) || // Emoji Symbols & Pictographs
+		(theChar >= 0x20000 && theChar <= 0x2FA1F);  // CJK Extension B-F & Supplements
+}
+
 // UTF-8 path conversion helpers for Windows Unicode path support
 #ifdef _WIN32
 inline std::filesystem::path PathFromU8(const std::string& s)
@@ -207,9 +309,9 @@ inline constexpr uint32_t ByteSwap32(uint32_t v) noexcept
 #endif
 	}
 	return ((v & 0x000000FFu) << 24) |
-	       ((v & 0x0000FF00u) <<  8) |
-	       ((v & 0x00FF0000u) >>  8) |
-	       ((v & 0xFF000000u) >> 24);
+			((v & 0x0000FF00u) <<  8) |
+			((v & 0x00FF0000u) >>  8) |
+			((v & 0xFF000000u) >> 24);
 }
 
 inline constexpr uint64_t ByteSwap64(uint64_t v) noexcept
@@ -224,13 +326,13 @@ inline constexpr uint64_t ByteSwap64(uint64_t v) noexcept
 #endif
 	}
 	return ((v & 0x00000000000000FFULL) << 56) |
-	       ((v & 0x000000000000FF00ULL) << 40) |
-	       ((v & 0x0000000000FF0000ULL) << 24) |
-	       ((v & 0x00000000FF000000ULL) <<  8) |
-	       ((v & 0x000000FF00000000ULL) >>  8) |
-	       ((v & 0x0000FF0000000000ULL) >> 24) |
-	       ((v & 0x00FF000000000000ULL) >> 40) |
-	       ((v & 0xFF00000000000000ULL) >> 56);
+			((v & 0x000000000000FF00ULL) << 40) |
+			((v & 0x0000000000FF0000ULL) << 24) |
+			((v & 0x00000000FF000000ULL) <<  8) |
+			((v & 0x000000FF00000000ULL) >>  8) |
+			((v & 0x0000FF0000000000ULL) >> 24) |
+			((v & 0x00FF000000000000ULL) >> 40) |
+			((v & 0xFF00000000000000ULL) >> 56);
 }
 
 // Endian conversion helpers

@@ -305,6 +305,7 @@ void StoreScreen::DrawItemIcon(Graphics* g, int theItemPosition, StoreItem theIt
 
         std::string aSlotText = TodReplaceNumberString("[STORE_UPGRADE_SLOTS]", "{SLOTS}", mApp->mPlayerInfo->mPurchases[STORE_ITEM_PACKET_UPGRADE] + 7);
         Rect aRect(aPosX, aPosY + 6, 55, 70);
+        // STORE_USE_*_IMAGE_LABEL not checked: no localized image, always draw text.
         TodDrawStringWrapped(g, aSlotText, aRect, Sexy::FONT_HOUSEOFTERROR16, Color::White, DS_ALIGN_CENTER_VERTICAL_MIDDLE);
     }
     else if (theItemType == STORE_ITEM_POOL_CLEANER)
@@ -413,11 +414,13 @@ void StoreScreen::DrawItem(Graphics* g, int theItemPosition, StoreItem theItemTy
         {
             aRect.mX -= 4;
         }
+        // STORE_USE_*_IMAGE_LABEL not checked: no localized image, always draw text.
         TodDrawStringWrapped(g, "[COMING_SOON]", aRect, Sexy::FONT_HOUSEOFTERROR16, Color(255, 0, 0), DS_ALIGN_CENTER_VERTICAL_MIDDLE);
     }
     else if (IsItemSoldOut(theItemType))
     {
         Rect aRect(aPosX, aPosY, 50, 70);
+        // STORE_USE_*_IMAGE_LABEL not checked: no localized image, always draw text.
         TodDrawStringWrapped(g, "[SOLD_OUT]", aRect, Sexy::FONT_HOUSEOFTERROR16, Color(255, 0, 0), DS_ALIGN_CENTER_VERTICAL_MIDDLE);
     }
     else if (mMouseOverItem == theItemType)

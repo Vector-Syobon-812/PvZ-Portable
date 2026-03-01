@@ -1270,6 +1270,15 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 	}
 }
 
+bool SexyAppBase::ReadUTF8StringFromFile(const std::string& theFileName, std::string* theString)
+{
+	Buffer aBuffer;
+	if (!ReadBufferFromFile(theFileName, &aBuffer))
+		return false;
+
+	return aBuffer.ToUTF8String(theString);
+}
+
 bool SexyAppBase::FileExists(const std::string& theFileName)
 {
 	if (mPlayingDemoBuffer)
@@ -2660,13 +2669,13 @@ bool SexyAppBase::LoadProperties(const std::string& theFileName, bool required, 
 	PropertiesParser aPropertiesParser(this);
 
 	// Load required language-file properties
-		if (!aPropertiesParser.ParsePropertiesBuffer(aBuffer))
-		{
-			Popup(aPropertiesParser.GetErrorText());		
-			return false;
-		}
-		else
-			return true;
+	if (!aPropertiesParser.ParsePropertiesBuffer(aBuffer))
+	{
+		Popup(aPropertiesParser.GetErrorText());
+		return false;
+	}
+	else
+		return true;
 }
 
 bool SexyAppBase::LoadProperties()

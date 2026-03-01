@@ -1,5 +1,4 @@
 #include "Font.h"
-#include "Image.h"
 
 using namespace Sexy;
 
@@ -52,24 +51,3 @@ int _Font::GetLineSpacing()
 {
 	return mHeight + mLineSpacingOffset;
 }
-
-
-int _Font::StringWidth(const std::string&)
-{
-	return 0;
-}
-
-
-int _Font::CharWidth(char theChar)
-{
-	std::string aString(1, theChar);
-	return StringWidth(aString);
-}
-
-int _Font::CharWidthKern(char theChar, char)
-{
-	return CharWidth(theChar);
-}
-
-void _Font::DrawString(Graphics*, int, int, const std::string&, const Color&, const Rect&){}
-
