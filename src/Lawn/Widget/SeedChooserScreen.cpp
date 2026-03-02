@@ -618,7 +618,7 @@ void SeedChooserScreen::OnStartButton()
 {
 	if (mApp->mGameMode == GAMEMODE_CHALLENGE_SEEING_STARS && !PickedPlantType(SEED_STARFRUIT))
 	{
-		if (!DisplayRepickWarningDialog("SEED_CHOOSER_SEEING_STARS_WARNING"))
+		if (!DisplayRepickWarningDialog("[SEED_CHOOSER_SEEING_STARS_WARNING]"))
 		{
 			return;
 		}
@@ -626,7 +626,7 @@ void SeedChooserScreen::OnStartButton()
 
 	if (mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 11 && !PickedPlantType(SEED_PUFFSHROOM))
 	{
-		if (!DisplayRepickWarningDialog("SEED_CHOOSER_PUFFSHROOM_WARNING"))
+		if (!DisplayRepickWarningDialog("[SEED_CHOOSER_PUFFSHROOM_WARNING]"))
 		{
 			return;
 		}
