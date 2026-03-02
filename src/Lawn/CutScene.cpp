@@ -1119,7 +1119,8 @@ void CutScene::AnimateBoard()
 			}
 		}
 
-		if (mCutsceneTime == TimeEarlyDaveEnterEnd && mCrazyDaveDialogStart != -1)
+		if (mCutsceneTime == TimeEarlyDaveEnterEnd && mCrazyDaveDialogStart != -1 &&
+			mApp->mGameMode != GameMode::GAMEMODE_UPSELL)
 		{
 			mApp->CrazyDaveTalkIndex(mCrazyDaveDialogStart);
 			mCrazyDaveDialogStart = -1;
@@ -1824,10 +1825,16 @@ void CutScene::ClearUpsellBoard()
 	{
 		aParticle->ParticleSystemDie();
 	}
+	ReanimationID aDaveReanimID = mApp->mCrazyDaveReanimID;
+	ReanimationID aBlinkReanimID = mApp->mCrazyDaveBlinkReanimID;
 	Reanimation* aReanim = nullptr;
 	while (mBoard->IterateReanimations(aReanim))
 	{
-		aReanim->ReanimationDie();
+		ReanimationID aReanimID = mApp->ReanimationGetID(aReanim);
+		if (aReanimID != aDaveReanimID && aReanimID != aBlinkReanimID)
+		{
+			aReanim->ReanimationDie();
+		}
 	}
 	mBoard->mPoolSparklyParticleID = ParticleSystemID::PARTICLESYSTEMID_NULL;
 
@@ -2143,6 +2150,8 @@ void CutScene::UpdateUpsell()
 	if (mCrazyDaveLastTalkIndex == -1)
 	{
 		mApp->CrazyDaveTalkIndex(mCrazyDaveDialogStart);
+		mCrazyDaveLastTalkIndex = mCrazyDaveDialogStart;
+		mCrazyDaveDialogStart = -1;
 		mCrazyDaveCountDown = ParseTalkTimeFromMessage();
 		return;
 	}
