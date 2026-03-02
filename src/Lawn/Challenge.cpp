@@ -3748,7 +3748,7 @@ void Challenge::ShovelAddWallnuts()
 {
 	for (int aCol = 0; aCol < MAX_GRID_SIZE_X; aCol++)
 	{
-		for (int aRow = 0; aRow < MAX_GRID_SIZE_Y; aRow++)
+		for (int aRow = 0; aRow < MAX_GRID_SIZE_Y - 1; aRow++)
 		{
 			mBoard->AddPlant(aCol, aRow, SEED_WALLNUT, SEED_NONE);
 		}
