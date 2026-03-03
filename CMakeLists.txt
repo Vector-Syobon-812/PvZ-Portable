@@ -78,7 +78,7 @@ elseif(NINTENDO_3DS)
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/3ds
 	)
 else()
-	if(MSVC)
+	if(VCPKG_TOOLCHAIN)
 		find_package(Vorbis CONFIG REQUIRED)
 		find_package(Ogg CONFIG REQUIRED)
 		find_package(libopenmpt CONFIG REQUIRED)
