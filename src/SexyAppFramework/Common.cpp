@@ -12,6 +12,8 @@
 #include <switch.h>
 #elif defined(__3DS__)
 #include <3ds.h>
+#elif defined(__ANDROID__)
+#include <android/log.h>
 #endif
 
 #include "misc/PerfTimer.h"
@@ -41,6 +43,8 @@ void Sexy::PrintF(const char *text, ...)
 
 #if defined(__SWITCH__) || defined(__3DS__)
 	svcOutputDebugString(buffer.c_str(), buffer.size());
+#elif defined(__ANDROID__)
+	__android_log_write(ANDROID_LOG_INFO, "PvZPortable", buffer.c_str());
 #endif
 
 	std::fwrite(buffer.data(), 1, buffer.size(), stdout);

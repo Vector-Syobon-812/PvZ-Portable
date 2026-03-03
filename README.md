@@ -55,6 +55,7 @@ This project supports the following platforms:
 | Windows (SDL2)  | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
 | macOS (SDL2)    | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
 | Haiku (SDL2)    | Executable dir (resources); per-user app-data for writable files | Partially works: no music                                                              |
+| Android         | `Android/data/io.github.wszqkzqk.pvzportable/files/` | Works                                                                                  |
 | Nintendo Switch | sdmc:/switch/PvZPortable | Works on real hardware. Kenji-NX crashes on boot.                           |
 | Nintendo 3DS    | sdmc:/3ds/PvZPortable    | In development, might not have enough memory for Old 3DS, might barely work on New 3DS |
 
@@ -79,6 +80,23 @@ You can customize these paths via command-line parameters:
 - `-savedir="<path>"`: Set the **save data directory** (where settings, savegames, caches, and screenshots are stored). This overrides the default OS-recommended application data path.
 
 **Note:** You **MUST** use the format `-param="<Your Path>"`. Space-separated values (e.g. `-resdir path`) are **NOT** supported.
+
+### Special Instructions for Android
+
+Download the APK from the [Releases](https://github.com/wszqkzqk/PvZ-Portable/releases) page or build it yourself. Because this project **does not include** any game assets, you will need to **copy the game resources** from a **legally purchased copy** of Plants vs. Zombies: GOTY Edition into the app's data directory on your Android device. Here's how to do it:
+
+1. **Install the APK** on your device (you may need to enable "Install from unknown sources").
+2. **Launch the app once** — it will create its data directory and exit (since no game resources are found yet).
+3. **Copy game resources** (`main.pak` and `properties/` folder) into:
+   ```
+   Android/data/io.github.wszqkzqk.pvzportable/files/
+   ```
+   You can find this directory using your device's built-in file manager or any third-party one. On some devices you may need to navigate to `Internal Storage > Android > data > io.github.wszqkzqk.pvzportable > files`.
+4. **Launch the app again** — the game should start normally.
+
+Save data (profiles, mid-level saves, caches) is also stored in the same `Android/data/io.github.wszqkzqk.pvzportable/files/` directory, so you can easily **import/export saves across platforms** via a file manager.
+
+The Android port is part of this project's **cross-platform porting research**. It preserves the original game's 4:3 aspect ratio and mouse-based input model — **no touch-screen-specific UI optimizations have been made**. SDL2 automatically maps touch events to mouse input, so the game is playable but not designed for mobile ergonomics.
 
 ## Game Version Compatibility
 
@@ -306,6 +324,5 @@ Note that this code has been **heavily refactored**, **optimized** and **moderni
 - **[@ruslan831](https://github.com/ruslan831)**: For archiving the 0.9.9 version's re-implementation.
 - **PopCap Games**: For creating the amazing game and releasing their framework to the public with a permissive license.
 - **The SDL Team**: For the amazing cross-platform development library that powers this port.
-- **The GLFW Team**: For their work on the windowing library used in the original re-implementation.
 - **The OpenMPT Team**: For libopenmpt, enabling high-quality MO3 music playback.
 - All the contributors who have worked or are actively working in this amazing project.

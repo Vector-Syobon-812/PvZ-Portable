@@ -220,9 +220,114 @@ jobs:
         name: pvz-portable-macos
         path: dist/
 
+  build-android:
+    name: Build for Android (arm64-v8a)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install Android NDK
+      run: |
+        # Use the latest NDK available on the runner
+        if [ -n "$ANDROID_NDK_LATEST_HOME" ] && [ -d "$ANDROID_NDK_LATEST_HOME" ]; then
+          echo "ANDROID_NDK=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+          echo "Using pre-installed NDK: $ANDROID_NDK_LATEST_HOME"
+        else
+          # Fallback: install via sdkmanager
+          yes | sdkmanager --install "ndk;$(sdkmanager --list 2>/dev/null | grep -oP 'ndk;\K[\d.]+' | sort -V | tail -1)" || true
+          NDK_DIR=$(ls -d "$ANDROID_HOME"/ndk/*/ 2>/dev/null | sort -V | tail -1)
+          echo "ANDROID_NDK=${NDK_DIR%/}" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=${NDK_DIR%/}" >> "$GITHUB_ENV"
+        fi
+
+    - name: Download SDL2 Source (Java SDLActivity)
+      run: |
+        # We only need SDL2 source for the Java SDLActivity class used by Gradle.
+        # The native SDL2 library comes from vcpkg.
+        SDL2_TAG=$(curl -s https://api.github.com/repos/libsdl-org/SDL/releases \
+          | grep -oP '"tag_name":\s*"release-\K2[^"]+' | head -1)
+        echo "Using SDL2 version: $SDL2_TAG"
+        wget -q "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_TAG}/SDL2-${SDL2_TAG}.tar.gz"
+        tar xf "SDL2-${SDL2_TAG}.tar.gz"
+        mv "SDL2-${SDL2_TAG}" sdl2-src
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: vcpkg.json
+
+    - name: Build Native Library with CMake
+      run: |
+        ABI=arm64-v8a
+        ANDROID_API=28
+        BUILD_DIR=build-android-$ABI
+
+        cmake -B $BUILD_DIR \
+          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+          -DVCPKG_TARGET_TRIPLET=arm64-android \
+          -DVCPKG_CMAKE_SYSTEM_VERSION=$ANDROID_API \
+          -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
+          -DANDROID_ABI=$ABI \
+          -DANDROID_PLATFORM=android-$ANDROID_API \
+          -DCMAKE_BUILD_TYPE=Release
+
+        cmake --build $BUILD_DIR -j$(nproc)
+
+        # Collect all shared libraries into jniLibs for Gradle to package
+        JNILIBS=android/app/src/main/jniLibs/$ABI
+        mkdir -p $JNILIBS
+        cp $BUILD_DIR/libmain.so $JNILIBS/
+
+        # Copy all .so dependencies from vcpkg (manifest mode installs into build dir)
+        VCPKG_LIB=$BUILD_DIR/vcpkg_installed/arm64-android/lib
+        for so in "$VCPKG_LIB"/*.so; do
+          [ -f "$so" ] && cp -L "$so" $JNILIBS/
+        done
+
+        # Strip debug symbols to reduce APK size
+        STRIP=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+        for so in "$JNILIBS"/*.so; do
+          "$STRIP" --strip-unneeded "$so"
+        done
+
+        echo "Collected .so files:"
+        ls -lh $JNILIBS/
+
+    - name: Build APK with Gradle
+      run: |
+        cd android
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+        # Use gradle wrapper; package pre-built native libraries into a release APK (debug-signed)
+        gradle wrapper
+        ./gradlew assembleRelease -PusePrebuiltLibs=true --no-daemon
+
+    - name: Copy APK
+      run: |
+        mkdir -p dist
+        find android -name "*.apk" -path "*/release/*" -exec cp {} dist/pvz-portable-android.apk \;
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: pvz-portable-android
+        path: dist/
+
   release:
     name: Release
-    needs: ['build-archlinux', 'build-windows-msys2-ucrt64', 'build-windows-msvc-x64', 'build-macos']
+    needs: ['build-archlinux', 'build-windows-msys2-ucrt64', 'build-windows-msvc-x64', 'build-macos', 'build-android']
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
@@ -252,6 +357,9 @@ jobs:
         chmod +x pvz-portable
         zip -r -y ../../release_files/pvz-portable-macos-aarch64.zip .
         cd ../..
+
+        echo "Preparing Android file..."
+        mv artifacts/pvz-portable-android/pvz-portable-android.apk release_files/pvz-portable-android.apk
 
         echo "Final files:"
         ls -lh release_files/
