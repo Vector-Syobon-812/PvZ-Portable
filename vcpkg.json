@@ -7,7 +7,6 @@
     "libvorbis",
     "mpg123",
     "sdl2",
-    "sdl2-mixer",
     "zlib"
   ]
 }
