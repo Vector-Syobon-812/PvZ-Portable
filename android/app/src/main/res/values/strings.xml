@@ -11,7 +11,7 @@
     <string name="btn_pick_zip">Select ZIP File</string>
     <string name="btn_pick_dir">Select Resource Folder</string>
 
-    <string name="section_save_data">Save Data</string>
+    <string name="section_save_data">Import/Export Save Data (Optional)</string>
     <string name="btn_export_save">Export Save Data</string>
     <string name="btn_import_save_zip">Import Save ZIP</string>
     <string name="btn_import_save_dir">Import Save Folder</string>
