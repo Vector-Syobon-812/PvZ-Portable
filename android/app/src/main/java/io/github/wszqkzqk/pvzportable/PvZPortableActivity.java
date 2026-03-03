@@ -1,5 +1,6 @@
 package io.github.wszqkzqk.pvzportable;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -7,27 +8,20 @@ import org.libsdl.app.SDLActivity;
 
 import java.io.File;
 
-/**
- * PvZ Portable Android entry point.
- *
- * Game resources (main.pak, properties/, etc.) should be placed by the user
- * into the app's external files directory:
- *   Android/data/io.github.wszqkzqk.pvzportable/files/
- *
- * This directory is accessible via a file manager on most devices.
- */
 public class PvZPortableActivity extends SDLActivity {
     private static final String TAG = "PvZPortable";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Ensure the external files directory exists before SDL starts
         File extDir = getExternalFilesDir(null);
-        if (extDir != null && !extDir.exists()) {
-            extDir.mkdirs();
-        }
+        if (extDir != null && !extDir.exists()) extDir.mkdirs();
+        Log.i(TAG, "Resource dir: " + (extDir != null ? extDir.getAbsolutePath() : "null"));
 
-        Log.i(TAG, "Resource directory: " + (extDir != null ? extDir.getAbsolutePath() : "null"));
+        if (!hasGameResources(extDir)) {
+            startActivity(new Intent(this, ResourceImportActivity.class));
+            finish();
+            return;
+        }
 
         super.onCreate(savedInstanceState);
     }
@@ -38,5 +32,12 @@ public class PvZPortableActivity extends SDLActivity {
             "SDL2",
             "main"
         };
+    }
+
+    private static boolean hasGameResources(File dir) {
+        if (dir == null || !dir.isDirectory()) return false;
+        File pak = new File(dir, "main.pak");
+        File props = new File(dir, "properties");
+        return pak.exists() && props.isDirectory();
     }
 }

@@ -33,6 +33,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ResourceImportActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+
         <!-- File provider for managing external storage on Android 10+ -->
         <provider
             android:name="androidx.core.content.FileProvider"
