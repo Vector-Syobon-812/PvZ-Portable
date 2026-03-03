@@ -6,7 +6,10 @@
     "libpng",
     "libvorbis",
     "mpg123",
-    "sdl2",
+    {
+      "name": "sdl2",
+      "platform": "!android"
+    },
     "zlib"
   ]
 }
