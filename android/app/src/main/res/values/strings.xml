@@ -7,13 +7,14 @@
     <string name="status_missing">Game resources not found.\nPlease import main.pak + properties/ to continue.</string>
 
     <string name="section_import_resources">Import Game Resources</string>
-    <string name="import_help">Select a ZIP file or a folder that contains main.pak and the properties/ directory.</string>
+    <string name="import_help">Select a ZIP file or a folder that contains legally purchased copy of main.pak and the properties/ directory.</string>
     <string name="btn_pick_zip">Select ZIP File</string>
     <string name="btn_pick_dir">Select Resource Folder</string>
 
     <string name="section_save_data">Save Data</string>
     <string name="btn_export_save">Export Save Data</string>
-    <string name="btn_import_save">Import Save Data</string>
+    <string name="btn_import_save_zip">Import Save ZIP</string>
+    <string name="btn_import_save_dir">Import Save Folder</string>
 
     <string name="btn_launch_game">Start Game</string>
 
@@ -22,4 +23,10 @@
     <string name="export_success">Save data exported successfully!</string>
     <string name="export_failed">Export failed: %1$s</string>
     <string name="no_save_data">No save data found to export.</string>
+    <string name="shortcut_import_resources">Import Resources</string>
+    <string name="shortcut_import_resources_long">Re-import Game Resources</string>
+    <string name="shortcut_export_saves">Export Saves</string>
+    <string name="shortcut_export_saves_long">Export Save Data</string>
+    <string name="shortcut_import_saves">Import Saves</string>
+    <string name="shortcut_import_saves_long">Import Save Data</string>
 </resources>

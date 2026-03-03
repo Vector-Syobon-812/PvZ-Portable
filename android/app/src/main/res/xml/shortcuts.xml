@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="import_resources"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:shortcutShortLabel="@string/shortcut_import_resources"
+        android:shortcutLongLabel="@string/shortcut_import_resources_long">
+        <intent
+            android:action="io.github.wszqkzqk.pvzportable.ACTION_IMPORT_RESOURCES"
+            android:targetPackage="io.github.wszqkzqk.pvzportable"
+            android:targetClass="io.github.wszqkzqk.pvzportable.ResourceImportActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="export_saves"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_save"
+        android:shortcutShortLabel="@string/shortcut_export_saves"
+        android:shortcutLongLabel="@string/shortcut_export_saves_long">
+        <intent
+            android:action="io.github.wszqkzqk.pvzportable.ACTION_EXPORT_SAVES"
+            android:targetPackage="io.github.wszqkzqk.pvzportable"
+            android:targetClass="io.github.wszqkzqk.pvzportable.ResourceImportActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="import_saves"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_revert"
+        android:shortcutShortLabel="@string/shortcut_import_saves"
+        android:shortcutLongLabel="@string/shortcut_import_saves_long">
+        <intent
+            android:action="io.github.wszqkzqk.pvzportable.ACTION_IMPORT_SAVES"
+            android:targetPackage="io.github.wszqkzqk.pvzportable"
+            android:targetClass="io.github.wszqkzqk.pvzportable.ResourceImportActivity" />
+    </shortcut>
+</shortcuts>

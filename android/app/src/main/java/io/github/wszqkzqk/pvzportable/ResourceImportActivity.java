@@ -25,12 +25,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * SAF-based resource import and save-data management.
- * No storage permissions required.
+ * Resource import and save data management via SAF.
+ * No runtime storage permissions required.
  */
 public class ResourceImportActivity extends AppCompatActivity {
     private static final String TAG = "ResImport";
     private static final int BUFFER_SIZE = 8192;
+
+    private static final String ACTION_IMPORT_RESOURCES = "io.github.wszqkzqk.pvzportable.ACTION_IMPORT_RESOURCES";
+    private static final String ACTION_EXPORT_SAVES = "io.github.wszqkzqk.pvzportable.ACTION_EXPORT_SAVES";
+    private static final String ACTION_IMPORT_SAVES = "io.github.wszqkzqk.pvzportable.ACTION_IMPORT_SAVES";
 
     private File gameDir;
     private TextView statusText;
@@ -38,7 +42,8 @@ public class ResourceImportActivity extends AppCompatActivity {
     private Button btnPickZip;
     private Button btnPickDir;
     private Button btnExportSave;
-    private Button btnImportSave;
+    private Button btnImportSaveZip;
+    private Button btnImportSaveDir;
     private Button btnLaunchGame;
 
     private final ActivityResultLauncher<String[]> zipPicker =
@@ -56,9 +61,14 @@ public class ResourceImportActivity extends AppCompatActivity {
             if (uri != null) exportSaveData(uri);
         });
 
-    private final ActivityResultLauncher<String[]> saveImporter =
+    private final ActivityResultLauncher<String[]> saveZipImporter =
         registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
-            if (uri != null) importSaveData(uri);
+            if (uri != null) importSaveDataFromZip(uri);
+        });
+
+    private final ActivityResultLauncher<Uri> saveDirImporter =
+        registerForActivityResult(new ActivityResultContracts.OpenDocumentTree(), uri -> {
+            if (uri != null) importSaveDataFromDir(uri);
         });
 
     @Override
@@ -74,7 +84,8 @@ public class ResourceImportActivity extends AppCompatActivity {
         btnPickZip    = findViewById(R.id.btn_pick_zip);
         btnPickDir    = findViewById(R.id.btn_pick_dir);
         btnExportSave = findViewById(R.id.btn_export_save);
-        btnImportSave = findViewById(R.id.btn_import_save);
+        btnImportSaveZip = findViewById(R.id.btn_import_save_zip);
+        btnImportSaveDir = findViewById(R.id.btn_import_save_dir);
         btnLaunchGame = findViewById(R.id.btn_launch_game);
 
         btnPickZip.setOnClickListener(v ->
@@ -86,12 +97,33 @@ public class ResourceImportActivity extends AppCompatActivity {
         btnExportSave.setOnClickListener(v ->
             saveExporter.launch("pvz-portable-savedata.zip")
         );
-        btnImportSave.setOnClickListener(v ->
-            saveImporter.launch(new String[]{"application/zip", "application/x-zip-compressed"})
+        btnImportSaveZip.setOnClickListener(v ->
+            saveZipImporter.launch(new String[]{"application/zip", "application/x-zip-compressed"})
+        );
+        btnImportSaveDir.setOnClickListener(v ->
+            saveDirImporter.launch(null)
         );
         btnLaunchGame.setOnClickListener(v -> launchGame());
 
         refreshStatus();
+        handleShortcutAction(getIntent());
+    }
+
+    private void handleShortcutAction(Intent intent) {
+        if (intent == null) return;
+        String action = intent.getAction();
+        if (action == null) return;
+        switch (action) {
+            case ACTION_IMPORT_RESOURCES:
+                btnPickZip.performClick();
+                break;
+            case ACTION_EXPORT_SAVES:
+                if (hasSaveData()) btnExportSave.performClick();
+                break;
+            case ACTION_IMPORT_SAVES:
+                btnImportSaveZip.performClick();
+                break;
+        }
     }
 
     private boolean hasResources() {
@@ -168,15 +200,15 @@ public class ResourceImportActivity extends AppCompatActivity {
     }
 
     /**
-     * If the zip has a single wrapper directory (e.g. "PvZ/main.pak"),
-     * strip it so files land directly in gameDir.
+     * Strips a single wrapper directory from zip entry paths when the entry
+     * doesn't start with a known top-level name (e.g. "PvZ/main.pak" -> "main.pak").
      */
     private String stripCommonPrefix(String name) {
         name = name.replace('\\', '/').replaceAll("^/+", "");
 
         if (isKnownTopLevel(name)) return name;
 
-        // Try removing one leading directory component
+        // Strip one leading directory component
         int slash = name.indexOf('/');
         if (slash > 0 && slash < name.length() - 1) {
             return name.substring(slash + 1);
@@ -301,7 +333,42 @@ public class ResourceImportActivity extends AppCompatActivity {
         }
     }
 
-    private void importSaveData(Uri uri) {
+    private void importSaveDataFromDir(Uri treeUri) {
+        setWorking(true);
+        new Thread(() -> {
+            try {
+                DocumentFile root = DocumentFile.fromTreeUri(this, treeUri);
+                if (root == null) throw new IOException("Cannot open directory");
+
+                // Resolve source: pick the userdata/ subfolder if present
+                DocumentFile sourceDir = root;
+                File destDir = new File(gameDir, "userdata");
+                if (!"userdata".equals(root.getName())) {
+                    DocumentFile nested = root.findFile("userdata");
+                    if (nested != null && nested.isDirectory()) {
+                        sourceDir = nested;
+                    }
+                }
+
+                copyDocumentTree(sourceDir, destDir);
+
+                runOnUiThread(() -> {
+                    Toast.makeText(this, R.string.import_success, Toast.LENGTH_SHORT).show();
+                    refreshStatus();
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "Save directory import failed", e);
+                runOnUiThread(() -> {
+                    Toast.makeText(this, getString(R.string.import_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+                    refreshStatus();
+                });
+            } finally {
+                runOnUiThread(() -> setWorking(false));
+            }
+        }).start();
+    }
+
+    private void importSaveDataFromZip(Uri uri) {
         setWorking(true);
         new Thread(() -> {
             try (InputStream is = getContentResolver().openInputStream(uri);
@@ -341,7 +408,8 @@ public class ResourceImportActivity extends AppCompatActivity {
         btnPickZip.setEnabled(!working);
         btnPickDir.setEnabled(!working);
         btnExportSave.setEnabled(!working && hasSaveData());
-        btnImportSave.setEnabled(!working);
+        btnImportSaveZip.setEnabled(!working);
+        btnImportSaveDir.setEnabled(!working);
         btnLaunchGame.setEnabled(!working && hasResources());
     }
 }
