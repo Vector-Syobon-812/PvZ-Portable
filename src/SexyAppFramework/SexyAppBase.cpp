@@ -3802,8 +3802,11 @@ SharedImageRef SexyAppBase::SetSharedImage(const std::string& theFileName, const
 	std::pair<SharedImageMap::iterator, bool> aResultPair;
 	SharedImageRef aSharedImageRef;
 	
-	{
+	if (mGLInterface != nullptr) {
 		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
+		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
+		aSharedImageRef = &aResultPair.first->second;
+	} else {
 		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
 		aSharedImageRef = &aResultPair.first->second;
 	}
@@ -3827,8 +3830,11 @@ SharedImageRef SexyAppBase::GetSharedImage(const std::string& theFileName, const
 	std::pair<SharedImageMap::iterator, bool> aResultPair;
 	SharedImageRef aSharedImageRef;
 
-	{
-		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);	
+	if (mGLInterface != nullptr) {
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
+		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
+		aSharedImageRef = &aResultPair.first->second;
+	} else {
 		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
 		aSharedImageRef = &aResultPair.first->second;
 	}
@@ -3838,7 +3844,7 @@ SharedImageRef SexyAppBase::GetSharedImage(const std::string& theFileName, const
 
 	if (aResultPair.second)
 	{
-		// Pass in a '!' as the first char of the file name to create a new image
+		// Leading '!' means create a blank image rather than loading from file
 		if ((theFileName.length() > 0) && (theFileName[0] == '!'))
 			aSharedImageRef.mSharedImage->mImage = new GLImage(mGLInterface);
 		else
@@ -3850,6 +3856,8 @@ SharedImageRef SexyAppBase::GetSharedImage(const std::string& theFileName, const
 
 void SexyAppBase::CleanSharedImages()
 {
+	if (mGLInterface == nullptr) return;
+
 	std::vector<GLImage*> imagesToDelete;
 	{
 		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
