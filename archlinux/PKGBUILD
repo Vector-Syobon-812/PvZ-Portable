@@ -1,7 +1,7 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
 pkgname=pvz-portable
-pkgver=0.1.8
+pkgver=0.1.10
 pkgrel=1
 pkgdesc="A cross-platform community-driven reimplementation of Plants vs. Zombies: Game of the Year Edition, aiming to bring the 100% authentic PvZ experience to every platform."
 url="https://github.com/wszqkzqk/${pkgname}"
@@ -33,7 +33,7 @@ source=(
     "io.github.wszqkzqk.pvz-portable.desktop"
 )
 sha256sums=('SKIP'
-            '67e5aea21aa1cb7108ae9db1853692a432f1cceba921765e1081ea26479ef0f1'
+            'SKIP'
             'b9dd103e31c17f867dad75af2bd901682f76e8a461e64a00b2538df2f2c584a8'
             '0a770062be1da2f5e8d6dc9514b951b70c8ab1b5c11fab470344cfd2c1990de5')
 
