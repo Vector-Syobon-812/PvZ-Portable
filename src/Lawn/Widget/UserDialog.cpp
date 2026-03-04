@@ -127,7 +127,7 @@ void UserDialog::FinishDeleteUser()
     mNumUsers--;
     if (mNumUsers == 7)
     {
-        mUserList->AddLine(TodStringTranslate("[CREATE_NEW_USER]"), false);
+        mUserList->AddLine(TodStringTranslate("(Create a New User)"), false);
     }
 }
 
