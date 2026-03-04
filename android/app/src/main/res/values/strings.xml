@@ -23,10 +23,6 @@
     <string name="export_success">Save data exported successfully!</string>
     <string name="export_failed">Export failed: %1$s</string>
     <string name="no_save_data">No save data found to export.</string>
-    <string name="shortcut_import_resources">Import Resources</string>
-    <string name="shortcut_import_resources_long">Re-import Game Resources</string>
-    <string name="shortcut_export_saves">Export Saves</string>
-    <string name="shortcut_export_saves_long">Export Save Data</string>
-    <string name="shortcut_import_saves">Import Saves</string>
-    <string name="shortcut_import_saves_long">Import Save Data</string>
+    <string name="shortcut_manage_data">Manage Data</string>
+    <string name="shortcut_manage_data_long">Manage Resources &amp; Saves</string>
 </resources>

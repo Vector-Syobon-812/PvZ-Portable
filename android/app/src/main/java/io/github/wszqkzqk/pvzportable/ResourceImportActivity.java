@@ -32,10 +32,6 @@ public class ResourceImportActivity extends AppCompatActivity {
     private static final String TAG = "ResImport";
     private static final int BUFFER_SIZE = 8192;
 
-    private static final String ACTION_IMPORT_RESOURCES = "io.github.wszqkzqk.pvzportable.ACTION_IMPORT_RESOURCES";
-    private static final String ACTION_EXPORT_SAVES = "io.github.wszqkzqk.pvzportable.ACTION_EXPORT_SAVES";
-    private static final String ACTION_IMPORT_SAVES = "io.github.wszqkzqk.pvzportable.ACTION_IMPORT_SAVES";
-
     private File gameDir;
     private TextView statusText;
     private ProgressBar progressBar;
@@ -106,24 +102,6 @@ public class ResourceImportActivity extends AppCompatActivity {
         btnLaunchGame.setOnClickListener(v -> launchGame());
 
         refreshStatus();
-        handleShortcutAction(getIntent());
-    }
-
-    private void handleShortcutAction(Intent intent) {
-        if (intent == null) return;
-        String action = intent.getAction();
-        if (action == null) return;
-        switch (action) {
-            case ACTION_IMPORT_RESOURCES:
-                btnPickZip.performClick();
-                break;
-            case ACTION_EXPORT_SAVES:
-                if (hasSaveData()) btnExportSave.performClick();
-                break;
-            case ACTION_IMPORT_SAVES:
-                btnImportSaveZip.performClick();
-                break;
-        }
     }
 
     private boolean hasResources() {
