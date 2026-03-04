@@ -97,15 +97,7 @@ Download the APK from the [Releases](https://github.com/wszqkzqk/PvZ-Portable/re
 
 #### Managing Data Later
 
-Long-press the app icon on your launcher to access **App Shortcuts**:
-
-| Shortcut | Action |
-|  :---:   |  :---: |
-| **Import Resources** | Re-import or replace `main.pak` and `properties/` |
-| **Export Saves** | Export `userdata/` as a ZIP to any location via the system file picker |
-| **Import Saves** | Import saves from a ZIP (with or without `userdata/` prefix) or a folder (`userdata/` itself, a parent containing it, or loose save files) |
-
-Each shortcut opens the management screen and directly triggers the corresponding file picker.
+Long-press the app icon on your launcher to access the **Manage Data** shortcut, which opens the resource management screen where you can re-import resources, export saves, or import saves.
 
 #### Notes
 
