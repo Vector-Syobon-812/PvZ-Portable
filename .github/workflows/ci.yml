@@ -336,7 +336,7 @@ jobs:
     - name: Copy APK
       run: |
         mkdir -p dist
-        find android -name "*.apk" -path "*/release/*" -exec cp {} dist/pvz-portable-android.apk \;
+        find android -name "*.apk" -path "*/release/*" -exec cp {} dist/pvz-portable-android-arm64-v8a.apk \;
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -378,7 +378,7 @@ jobs:
         cd ../..
 
         echo "Preparing Android file..."
-        mv artifacts/pvz-portable-android/pvz-portable-android.apk release_files/pvz-portable-android.apk
+        mv artifacts/pvz-portable-android/pvz-portable-android-arm64-v8a.apk release_files/pvz-portable-android-arm64-v8a.apk
 
         echo "Final files:"
         ls -lh release_files/
