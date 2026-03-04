@@ -9,18 +9,22 @@ using namespace Sexy;
 GLImage::GLImage() : MemoryImage(gSexyAppBase)
 {
 	mGLInterface = gSexyAppBase->mGLInterface;
-	mGLInterface->AddGLImage(this);
+	if (mGLInterface)
+		mGLInterface->AddGLImage(this);
 }
 
-GLImage::GLImage(GLInterface *theGLInterface) : MemoryImage(theGLInterface->mApp)
+GLImage::GLImage(GLInterface *theGLInterface)
+	: MemoryImage(theGLInterface ? theGLInterface->mApp : gSexyAppBase)
 {
 	mGLInterface = theGLInterface;
-	mGLInterface->AddGLImage(this);
+	if (mGLInterface)
+		mGLInterface->AddGLImage(this);
 }
 
 GLImage::~GLImage()
 {
-	mGLInterface->RemoveGLImage(this);
+	if (mGLInterface)
+		mGLInterface->RemoveGLImage(this);
 }
 
 void GLImage::Create(int theWidth, int theHeight)

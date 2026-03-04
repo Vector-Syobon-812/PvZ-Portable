@@ -46,6 +46,21 @@ void SexyAppBase::MakeWindow()
 		if (mWindow)
 			mContext = (void*)SDL_GL_CreateContext((SDL_Window*)mWindow);
 
+#ifdef __ANDROID__
+		// Retry: EGL surface may be transiently unavailable on Android.
+		for (int retry = 0; !mContext && mWindow && retry < 20; retry++)
+		{
+			SDL_Delay(100);
+			SDL_PumpEvents();
+			mContext = (void*)SDL_GL_CreateContext((SDL_Window*)mWindow);
+		}
+		if (!mContext)
+		{
+			if (mWindow) { SDL_DestroyWindow((SDL_Window*)mWindow); mWindow = nullptr; }
+			fprintf(stderr, "Failed to create OpenGL ES context on Android.\n");
+			return;
+		}
+#else
 		// Fallback: desktop GL 2.1 compatibility (macOS, old Windows drivers, etc.)
 		if (!mContext)
 		{
@@ -73,6 +88,7 @@ void SexyAppBase::MakeWindow()
 
 			gDesktopGLFallback = true;
 		}
+#endif
 
 		SDL_GL_SetSwapInterval(1);
 	}

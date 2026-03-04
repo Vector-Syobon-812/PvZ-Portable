@@ -1293,6 +1293,10 @@ void LawnApp::Init()
 	mSawYeti = false;
 
 	SexyApp::Init();
+
+	if (mShutdown) // MakeWindow() failed
+		return;
+
 	// @Patoke: horrible debug checks, breaks the whole exe in release mode
 //#ifdef _PVZ_DEBUG
 	TodAssertInitForApp();

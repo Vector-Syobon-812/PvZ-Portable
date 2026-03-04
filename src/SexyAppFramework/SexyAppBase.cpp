@@ -3102,7 +3102,14 @@ void SexyAppBase::Init()
 	mWidgetManager->Resize(Rect(0, 0, mWidth, mHeight), Rect(0, 0, mWidth, mHeight));
 
 	MakeWindow();
-		
+
+	if (mGLInterface == nullptr)
+	{
+		fprintf(stderr, "FATAL: Failed to create OpenGL interface.\n");
+		mShutdown = true;
+		return;
+	}
+
 	if (mPlayingDemoBuffer)
 	{
 		// Get video data
