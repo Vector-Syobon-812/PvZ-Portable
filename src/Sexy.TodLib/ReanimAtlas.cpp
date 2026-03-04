@@ -25,11 +25,12 @@ void ReanimAtlas::ReanimAtlasDispose()
 
 ReanimAtlasImage* ReanimAtlas::GetEncodedReanimAtlas(Image* theImage)
 {
-	if (theImage == nullptr || reinterpret_cast<intptr_t>(theImage) > 1000)
+	if (theImage == nullptr || reinterpret_cast<uintptr_t>(theImage) > 1000)
 		return nullptr;
 
 	intptr_t aAtlasIndex = reinterpret_cast<intptr_t>(theImage) - 1;
-	TOD_ASSERT(aAtlasIndex >= 0 && aAtlasIndex < mImageCount);
+	if (aAtlasIndex < 0 || aAtlasIndex >= mImageCount)  // Runtime bounds check
+		return nullptr;
 	return &mImageArray[aAtlasIndex];
 }
 
@@ -63,8 +64,8 @@ bool sSortByNonIncreasingHeight(const ReanimAtlasImage& image1, const ReanimAtla
 		return image1.mHeight > image2.mHeight;
 	else if (image1.mWidth != image2.mWidth)
 		return image1.mWidth > image2.mWidth;
-	else
-		return reinterpret_cast<uintptr_t>(&image1) > reinterpret_cast<uintptr_t>(&image2);
+	else  // Stable tiebreaker using original image pointer (invariant during sort)
+		return reinterpret_cast<uintptr_t>(image1.mOriginalImage) > reinterpret_cast<uintptr_t>(image2.mOriginalImage);
 }
 
 static int GetClosestPowerOf2Above(int theNum)
@@ -194,7 +195,8 @@ void ReanimAtlas::AddImage(Image* theImage)
 {
 	if (theImage->mNumCols == 1 && theImage->mNumRows == 1)
 	{
-		TOD_ASSERT(mImageCount < MAX_REANIM_IMAGES);
+		if (mImageCount >= MAX_REANIM_IMAGES)  // Prevent array overflow
+			return;
 
 		ReanimAtlasImage* aImage = &mImageArray[mImageCount++];
 		aImage->mHeight = theImage->mHeight;
@@ -242,8 +244,9 @@ void ReanimAtlas::ReanimAtlasCreate(ReanimatorDefinition* theReanimDef)
 			if (aImage != nullptr && aImage->mWidth <= 254 && aImage->mHeight <= 254)
 			{
 				intptr_t aImageIndex = FindImage(aImage);
-				TOD_ASSERT(aImageIndex >= 0);
-				aImage = (Image*)(aImageIndex + 1);  // ★ 将图片在数组中的序号作为 Image* 修改动画定义
+				if (aImageIndex < 0)  // Image not in atlas (e.g. mNumCols>1 or atlas full)
+					continue;
+				aImage = (Image*)(aImageIndex + 1);  // Encode atlas index as Image*
 			}
 		}
 	}

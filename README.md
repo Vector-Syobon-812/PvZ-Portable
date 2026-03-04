@@ -10,7 +10,7 @@ A **cross-platform** community-driven reimplementation of Plants vs. Zombies: Ga
 
 | 🌿 Authentic | 🎮 Portable | 🛠️ Open |
 | :---: | :---: | :---: |
-| Almost 100% gameplay recreation | Support for 32/64 bit systems<br>Run on Linux, Windows, macOS, Switch... | OpenGL ES 2.0 & SDL |
+| Almost 100% gameplay recreation | Support for 32/64 bit systems<br>Run on Linux, Windows, macOS, Android, Switch... | OpenGL ES 2.0 & SDL |
 
 **⚠️ Notice:**
 
@@ -34,7 +34,7 @@ This project is **based on** [Patoke](https://github.com/Patoke/re-plants-vs-zom
 - [x] Optimize memory usage for console ports (Partial)
 - [x] **Compatible** with original PvZ GOTY Edition's ***global user data*** (profile info, adventure progress, coins, Zen Garden, etc., stored in `user*.dat`)
   - [x] Fix 2038 year problem while keeping compatibility
-- [x] **Portable mid-level save game** format `.v4` support (share **mid-level saves** between Windows, Linux, macOS, Switch, etc.)
+- [x] **Portable mid-level save game** format `.v4` support (share **mid-level saves** between Windows, Linux, macOS, Android, Switch, etc.)
   - [x] Support export/import of `.v4` save files to/from human-readable YAML format for easy editing
 - [x] Implement with `std::thread` for cross-platform threading support
 - [x] Implement with `std::filesystem` for cross-platform file system support
@@ -51,10 +51,12 @@ This project supports the following platforms:
 
 | Platform        | Data path                    | Status                                                                                 |
 |-----------------|------------------------------|----------------------------------------------------------------------------------------|
-| Linux (SDL2)    | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
-| Windows (SDL2)  | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
-| macOS (SDL2)    | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
-| Haiku (SDL2)    | Executable dir (resources); per-user app-data for writable files | Partially works: no music                                                              |
+| Linux           | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
+| Windows         | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
+| macOS           | Executable dir (resources); per-user app-data for writable files | Works                                                                                  |
+| BSD Family      | Executable dir (resources); per-user app-data for writable files | Works (verified at least on FreeBSD)                                                                               |
+| Haiku           | Executable dir (resources); per-user app-data for writable files | Partially works: no music                                                              |
+| Android         | `Android/data/io.github.wszqkzqk.pvzportable/files/` | Works                                                                                  |
 | Nintendo Switch | sdmc:/switch/PvZPortable | Works on real hardware. Kenji-NX crashes on boot.                           |
 | Nintendo 3DS    | sdmc:/3ds/PvZPortable    | In development, might not have enough memory for Old 3DS, might barely work on New 3DS |
 
@@ -79,6 +81,29 @@ You can customize these paths via command-line parameters:
 - `-savedir="<path>"`: Set the **save data directory** (where settings, savegames, caches, and screenshots are stored). This overrides the default OS-recommended application data path.
 
 **Note:** You **MUST** use the format `-param="<Your Path>"`. Space-separated values (e.g. `-resdir path`) are **NOT** supported.
+
+### Special Instructions for Android
+
+Download the APK from the [Releases](https://github.com/wszqkzqk/PvZ-Portable/releases) page or build it yourself. Because this project **does not include** any game assets, you will need to **import the game resources** from a **legally purchased copy** of Plants vs. Zombies: GOTY Edition.
+
+#### First Launch
+
+1. **Install the APK** (you may need to enable "Install from unknown sources").
+2. **Launch the app** — since no game resources are found, a **resource import screen** will appear automatically.
+3. **Import game resources** by selecting either:
+   - A **ZIP file** containing `main.pak` and `properties/` (either at the ZIP root or inside one wrapper directory, e.g. `PvZ/main.pak`).
+   - A **folder** that directly contains `main.pak` and `properties/`, or whose immediate subfolder does.
+4. Press **Start Game** once the import succeeds.
+
+#### Managing Data Later
+
+Long-press the app icon on your launcher to access the **Manage Data** shortcut, which opens the resource management screen where you can re-import resources, export saves, or import saves.
+
+#### Notes
+
+- All data is stored in `Android/data/io.github.wszqkzqk.pvzportable/files/`. No extra storage permissions are needed — the app uses the **Storage Access Framework (SAF)** for all imports and exports.
+- Save data is interchangeable with desktop versions. See the [save data section](#save-data-compatibility-user-data-and-mid-level-saves) chapter for details.
+- The Android port is part of this project's **cross-platform porting research**. It preserves the original game's 4:3 aspect ratio and mouse-based input model — **no touch-screen-specific UI optimizations have been made**. SDL2 automatically maps touch events to mouse input, so the game is playable but not designed for mobile ergonomics.
 
 ## Game Version Compatibility
 
@@ -306,6 +331,5 @@ Note that this code has been **heavily refactored**, **optimized** and **moderni
 - **[@ruslan831](https://github.com/ruslan831)**: For archiving the 0.9.9 version's re-implementation.
 - **PopCap Games**: For creating the amazing game and releasing their framework to the public with a permissive license.
 - **The SDL Team**: For the amazing cross-platform development library that powers this port.
-- **The GLFW Team**: For their work on the windowing library used in the original re-implementation.
 - **The OpenMPT Team**: For libopenmpt, enabling high-quality MO3 music playback.
 - All the contributors who have worked or are actively working in this amazing project.

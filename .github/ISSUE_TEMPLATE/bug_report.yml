@@ -40,7 +40,9 @@ body:
         - Windows (i686)
         - macOS (Apple Silicon)
         - macOS (Intel)
+        - Android
         - Haiku
+        - BSD Family
         - Nintendo Switch
         - Nintendo 3DS
         - Other

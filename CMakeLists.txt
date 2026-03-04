@@ -78,7 +78,7 @@ elseif(NINTENDO_3DS)
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/3ds
 	)
 else()
-	if(MSVC)
+	if(VCPKG_TOOLCHAIN)
 		find_package(Vorbis CONFIG REQUIRED)
 		find_package(Ogg CONFIG REQUIRED)
 		find_package(libopenmpt CONFIG REQUIRED)
@@ -167,7 +167,13 @@ if(BUILD_STATIC AND TARGET SDL2::SDL2-static)
 	_pvz_patch_sdl2_iface_libs(SDL2_mixer_ext_Static)
 endif()
 
-add_executable(pvz-portable ${SOURCES})
+# Android requires a shared library loaded by SDLActivity; other platforms use an executable.
+if(ANDROID)
+	add_library(pvz-portable SHARED ${SOURCES})
+else()
+	add_executable(pvz-portable ${SOURCES})
+endif()
+
 target_include_directories(pvz-portable PRIVATE
 	${PLAT_INCLUDES}
 	${PROJECT_SOURCE_DIR}/src
@@ -252,4 +258,7 @@ elseif (NINTENDO_3DS)
 	ctr_create_3dsx(pvz-portable
 		SMDH pvz-portable.smdh
 	)
+elseif (ANDROID)
+	target_link_libraries(pvz-portable PRIVATE GLESv2 EGL android log)
+	set_target_properties(pvz-portable PROPERTIES OUTPUT_NAME "main")
 endif()

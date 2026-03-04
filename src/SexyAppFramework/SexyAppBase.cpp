@@ -82,6 +82,17 @@ SexyAppBase::SexyAppBase()
 	mResourceDir = "sdmc:/switch/PvZPortable/";
 #elif defined(__3DS__)
 	mResourceDir = "sdmc:/3ds/PvZPortable/";
+#elif defined(__ANDROID__)
+	// On Android, use external storage so that users can copy game resources via a file manager
+	const char* aExtPath = SDL_AndroidGetExternalStoragePath();
+	if (aExtPath)
+	{
+		mResourceDir = std::string(aExtPath) + "/";
+	}
+	else
+	{
+		mResourceDir = "";
+	}
 #else
 	char* aBasePath = SDL_GetBasePath();
 	if (aBasePath)
@@ -3026,12 +3037,22 @@ void SexyAppBase::Init()
 
 	InitPropertiesHook();
 
-#if !defined(__SWITCH__) && !defined(__3DS__)
+#if !defined(__SWITCH__) && !defined(__3DS__) && !defined(__ANDROID__)
 	char* aPrefPath = SDL_GetPrefPath("io.github.wszqkzqk", "PvZPortable"); // Avoid conflict with official Plants vs. Zombies
 	if (aPrefPath)
 	{
 		SetAppDataFolder(aPrefPath);
 		SDL_free(aPrefPath);
+	}
+#elif defined(__ANDROID__)
+	// On Android, store save data under the same external files directory as resources,
+	// so that users can easily import/export saves via a file manager.
+	{
+		const char* aExtPath = SDL_AndroidGetExternalStoragePath();
+		if (aExtPath)
+		{
+			SetAppDataFolder(std::string(aExtPath) + "/");
+		}
 	}
 #endif
 	
@@ -3081,7 +3102,14 @@ void SexyAppBase::Init()
 	mWidgetManager->Resize(Rect(0, 0, mWidth, mHeight), Rect(0, 0, mWidth, mHeight));
 
 	MakeWindow();
-		
+
+	if (mGLInterface == nullptr)
+	{
+		fprintf(stderr, "FATAL: Failed to create OpenGL interface.\n");
+		mShutdown = true;
+		return;
+	}
+
 	if (mPlayingDemoBuffer)
 	{
 		// Get video data
@@ -3781,8 +3809,11 @@ SharedImageRef SexyAppBase::SetSharedImage(const std::string& theFileName, const
 	std::pair<SharedImageMap::iterator, bool> aResultPair;
 	SharedImageRef aSharedImageRef;
 	
-	{
+	if (mGLInterface != nullptr) {
 		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
+		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
+		aSharedImageRef = &aResultPair.first->second;
+	} else {
 		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
 		aSharedImageRef = &aResultPair.first->second;
 	}
@@ -3806,8 +3837,11 @@ SharedImageRef SexyAppBase::GetSharedImage(const std::string& theFileName, const
 	std::pair<SharedImageMap::iterator, bool> aResultPair;
 	SharedImageRef aSharedImageRef;
 
-	{
-		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);	
+	if (mGLInterface != nullptr) {
+		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
+		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
+		aSharedImageRef = &aResultPair.first->second;
+	} else {
 		aResultPair = mSharedImageMap.try_emplace(SharedImageMap::key_type(anUpperFileName, anUpperVariant));
 		aSharedImageRef = &aResultPair.first->second;
 	}
@@ -3817,7 +3851,7 @@ SharedImageRef SexyAppBase::GetSharedImage(const std::string& theFileName, const
 
 	if (aResultPair.second)
 	{
-		// Pass in a '!' as the first char of the file name to create a new image
+		// Leading '!' means create a blank image rather than loading from file
 		if ((theFileName.length() > 0) && (theFileName[0] == '!'))
 			aSharedImageRef.mSharedImage->mImage = new GLImage(mGLInterface);
 		else
@@ -3829,6 +3863,8 @@ SharedImageRef SexyAppBase::GetSharedImage(const std::string& theFileName, const
 
 void SexyAppBase::CleanSharedImages()
 {
+	if (mGLInterface == nullptr) return;
+
 	std::vector<GLImage*> imagesToDelete;
 	{
 		std::scoped_lock anAutoCrit(mGLInterface->mCritSect);
