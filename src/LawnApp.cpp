@@ -896,7 +896,7 @@ void LawnApp::FinishCreateUserDialog(bool isYes)
 			true,
 			"Enter Your Name",
 			"Please enter your name to create a new user profile for storing high score data and game progress",
-			"OK",
+			"[DIALOG_BUTTON_OK]",
 			Dialog::BUTTONS_FOOTER
 		);
 	}
@@ -907,7 +907,7 @@ void LawnApp::FinishCreateUserDialog(bool isYes)
 			true,
 			"Enter Your Name"/*"[ENTER_YOUR_NAME]"*/,
 			"Please enter your name to create a new user profile for storing high score data and game progress"/*"[ENTER_NEW_USER]"*/,
-			"OK"/*"[DIALOG_BUTTON_OK]"*/,
+			"[DIALOG_BUTTON_OK]",
 			Dialog::BUTTONS_FOOTER
 		);
 	}
@@ -925,7 +925,7 @@ void LawnApp::FinishCreateUserDialog(bool isYes)
 				true,
 				"Name Conflict"/*"[NAME_CONFLICT]"*/,
 				"The name you entered is already being used.  Please enter a unique player name"/*"[ENTER_UNIQUE_PLAYER_NAME]"*/,
-				"OK"/*"[DIALOG_BUTTON_OK]"*/,
+				"[DIALOG_BUTTON_OK]",
 				Dialog::BUTTONS_FOOTER
 			);
 		}
@@ -1047,7 +1047,7 @@ void LawnApp::FinishRenameUserDialog(bool isYes)
 			true,
 			"Name Conflict"/*"[NAME_CONFLICT]"*/,
 			"The name you entered is already being used.  Please enter a unique player name"/*"[ENTER_UNIQUE_PLAYER_NAME]"*/,
-			"OK"/*"[DIALOG_BUTTON_OK]"*/,
+			"[DIALOG_BUTTON_OK]",
 			Dialog::BUTTONS_FOOTER
 		);
 		return;
@@ -1881,7 +1881,7 @@ void LawnApp::URLOpenFailed(const std::string& theURL)
 		theURL + 
 		"\n\nFor your convenience, this URL has already been copied to your clipboard.";
 
-	DoDialog(Dialogs::DIALOG_OPENURL_WAIT, true, "Open Browser", "OK", aString, Dialog::BUTTONS_FOOTER);
+	DoDialog(Dialogs::DIALOG_OPENURL_WAIT, true, "Open Browser", "[DIALOG_BUTTON_OK]", aString, Dialog::BUTTONS_FOOTER);
 }
 
 //0x452EE0

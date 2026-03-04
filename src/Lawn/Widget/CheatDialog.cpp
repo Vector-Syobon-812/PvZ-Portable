@@ -119,7 +119,7 @@ bool CheatDialog::ApplyCheat()
 			true, 
 			"Enter Level", 
 			"Invalid Level. Do 'number' or 'area-subarea' or 'Cnumber' or 'Farea-subarea'.", 
-			"OK", 
+			"[DIALOG_BUTTON_OK]", 
 			Dialog::BUTTONS_FOOTER
 		);
 		return false;

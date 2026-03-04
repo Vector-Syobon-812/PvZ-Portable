@@ -233,7 +233,7 @@ void NewOptionsDialog::CheckboxChecked(int theId, bool checked)
                 "Windowed mode is only available if your desktop was running in either\n"
                     "16 bit or 32 bit color mode when you started the game.\n\n"
                     "If you'd like to run in Windowed mode then you need to quit the game and switch your desktop to 16 or 32 bit color mode.", 
-                "OK", 
+                "[DIALOG_BUTTON_OK]", 
                 Dialog::BUTTONS_FOOTER
             );
 
@@ -255,7 +255,7 @@ void NewOptionsDialog::CheckboxChecked(int theId, bool checked)
                         "Your video card does not\n"
                         "meet the minimum requirements\n"
                         "for this game.",
-                    "OK",
+                    "[DIALOG_BUTTON_OK]",
                     Dialog::BUTTONS_FOOTER
                 );
             }
@@ -267,7 +267,7 @@ void NewOptionsDialog::CheckboxChecked(int theId, bool checked)
                     "Warning",
                     "Your video card may not fully support this feature.\n\n"
                         "If you experience slower performance, please disable Hardware Acceleration.\n",
-                    "OK",
+                    "[DIALOG_BUTTON_OK]",
                     Dialog::BUTTONS_FOOTER
                 );
             }

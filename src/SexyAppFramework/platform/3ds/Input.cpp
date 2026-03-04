@@ -46,7 +46,7 @@ bool SexyAppBase::StartTextInput(std::string& theInput)
 	swkbdConfigSetType(&kbd, SwkbdType_Normal);
 
 	swkbdConfigSetGuideText(&kbd, "Enter text...");
-	swkbdConfigSetOkButtonText(&kbd, "OK");
+	swkbdConfigSetOkButtonText(&kbd, "[DIALOG_BUTTON_OK]");
 
 	Result rc = swkbdShow(&kbd, buf, sizeof(buf));
 	swkbdClose(&kbd);
