@@ -22,10 +22,9 @@
 #ifndef __REANIMATLAS_H__
 #define __REANIMATLAS_H__
 
+#include <vector>
 #include "misc/Rect.h"
 using namespace Sexy;
-
-#define MAX_REANIM_IMAGES 64
 
 class ReanimatorDefinition;
 namespace Sexy
@@ -52,15 +51,14 @@ bool                                sSortByNonIncreasingHeight(const ReanimAtlas
 class ReanimAtlas
 {
 public:
-    ReanimAtlasImage                mImageArray[MAX_REANIM_IMAGES];     //+0x0
-    int                             mImageCount;                        //+0x500
-    MemoryImage*                    mMemoryImage;                       //+0x504
+    std::vector<ReanimAtlasImage>   mImageArray;
+    MemoryImage*                    mMemoryImage;
 
 public:
     ReanimAtlas();
+    ~ReanimAtlas();
 
     void                            ReanimAtlasCreate(ReanimatorDefinition* theReanimDef);
-    void                            ReanimAtlasDispose();
     /*inline*/ void                 AddImage(Image* theImage);
     /*inline*/ int                  FindImage(Image* theImage);
     bool                            ImageFits(int theImageCount, const Rect& rectTest, int theMaxWidth);

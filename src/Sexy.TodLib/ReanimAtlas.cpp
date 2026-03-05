@@ -30,18 +30,12 @@
 //0x470250
 ReanimAtlas::ReanimAtlas()
 {
-	mImageCount = 0;
 	mMemoryImage = nullptr;
 }
 
-void ReanimAtlas::ReanimAtlasDispose()
+ReanimAtlas::~ReanimAtlas()
 {
-	if (mMemoryImage)
-	{
-		delete mMemoryImage;
-		mMemoryImage = nullptr;
-	}
-	mImageCount = 0;
+	delete mMemoryImage;
 }
 
 ReanimAtlasImage* ReanimAtlas::GetEncodedReanimAtlas(Image* theImage)
@@ -50,7 +44,7 @@ ReanimAtlasImage* ReanimAtlas::GetEncodedReanimAtlas(Image* theImage)
 		return nullptr;
 
 	intptr_t aAtlasIndex = reinterpret_cast<intptr_t>(theImage) - 1;
-	if (aAtlasIndex < 0 || aAtlasIndex >= mImageCount)  // Runtime bounds check
+	if (aAtlasIndex < 0 || aAtlasIndex >= static_cast<intptr_t>(mImageArray.size()))
 		return nullptr;
 	return &mImageArray[aAtlasIndex];
 }
@@ -103,7 +97,7 @@ int ReanimAtlas::PickAtlasWidth()
 {
 	int totalArea = 0;
 	int aMaxWidth = 0;
-	for (int i = 0; i < mImageCount; i++)
+	for (size_t i = 0; i < mImageArray.size(); i++)
 	{
 		ReanimAtlasImage* aImage = &mImageArray[i];
 		totalArea += aImage->mWidth * aImage->mHeight;
@@ -193,11 +187,11 @@ bool ReanimAtlas::PlaceAtlasImage(ReanimAtlasImage* theAtlasImageToPlace, int th
 //0x470580
 void ReanimAtlas::ArrangeImages(int& theAtlasWidth, int& theAtlasHeight)
 {
-	std::sort(mImageArray, mImageArray + mImageCount, sSortByNonIncreasingHeight);  // 将所有图集图片按高度降序排序
+	std::sort(mImageArray.begin(), mImageArray.end(), sSortByNonIncreasingHeight);  // 将所有图集图片按高度降序排序
 	theAtlasWidth = PickAtlasWidth();
 	theAtlasHeight = 0;
 
-	for (int i = 0; i < mImageCount; i++)
+	for (int i = 0; i < static_cast<int>(mImageArray.size()); i++)
 	{
 		ReanimAtlasImage* aImage = &mImageArray[i];
 		PlaceAtlasImage(aImage, i, theAtlasWidth);
@@ -216,19 +210,16 @@ void ReanimAtlas::AddImage(Image* theImage)
 {
 	if (theImage->mNumCols == 1 && theImage->mNumRows == 1)
 	{
-		if (mImageCount >= MAX_REANIM_IMAGES)  // Prevent array overflow
-			return;
-
-		ReanimAtlasImage* aImage = &mImageArray[mImageCount++];
-		aImage->mHeight = theImage->mHeight;
-		aImage->mWidth = theImage->mWidth;
-		aImage->mOriginalImage = theImage;
+		auto& aImage = mImageArray.emplace_back();
+		aImage.mHeight = theImage->mHeight;
+		aImage.mWidth = theImage->mWidth;
+		aImage.mOriginalImage = theImage;
 	}
 }
 
 int ReanimAtlas::FindImage(Image* theImage)
 {
-	for (int i = 0; i < mImageCount; i++)
+	for (int i = 0; i < static_cast<int>(mImageArray.size()); i++)
 		if (mImageArray[i].mOriginalImage == theImage)
 			return i;
 
@@ -265,7 +256,7 @@ void ReanimAtlas::ReanimAtlasCreate(ReanimatorDefinition* theReanimDef)
 			if (aImage != nullptr && aImage->mWidth <= 254 && aImage->mHeight <= 254)
 			{
 				intptr_t aImageIndex = FindImage(aImage);
-				if (aImageIndex < 0)  // Image not in atlas (e.g. mNumCols>1 or atlas full)
+				if (aImageIndex < 0)  // Image not in atlas (e.g. mNumCols>1)
 					continue;
 				aImage = (Image*)(aImageIndex + 1);  // Encode atlas index as Image*
 			}
@@ -274,7 +265,7 @@ void ReanimAtlas::ReanimAtlasCreate(ReanimatorDefinition* theReanimDef)
 
 	mMemoryImage = ReanimAtlasMakeBlankMemoryImage(aAtlasWidth, aAtlasHeight);
 	Graphics aMemoryGraphis(mMemoryImage);
-	for (int aImageIndex = 0; aImageIndex < mImageCount; aImageIndex++)
+	for (int aImageIndex = 0; aImageIndex < static_cast<int>(mImageArray.size()); aImageIndex++)
 	{
 		ReanimAtlasImage* aImage = &mImageArray[aImageIndex];
 		aMemoryGraphis.DrawImage(aImage->mOriginalImage, aImage->mX, aImage->mY);  // 将原贴图绘制在图集上
