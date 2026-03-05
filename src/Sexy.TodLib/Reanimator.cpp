@@ -263,7 +263,6 @@ void ReanimationFreeDefinition(ReanimatorDefinition* theDefinition)
 	// 释放 Atlas
 	if (theDefinition->mReanimAtlas != nullptr)
 	{
-		theDefinition->mReanimAtlas->ReanimAtlasDispose();
 		delete theDefinition->mReanimAtlas;
 		theDefinition->mReanimAtlas = nullptr;
 	}
