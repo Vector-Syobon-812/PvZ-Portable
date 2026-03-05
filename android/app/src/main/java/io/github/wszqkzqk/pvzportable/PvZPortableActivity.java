@@ -89,6 +89,14 @@ public class PvZPortableActivity extends SDLActivity {
         };
     }
 
+    @Override
+    public void setRequestedOrientation(int requestedOrientation) {
+        if (requestedOrientation == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE;
+        }
+        super.setRequestedOrientation(requestedOrientation);
+    }
+
     private static boolean hasGameResources(File dir) {
         if (dir == null || !dir.isDirectory()) return false;
         File pak = new File(dir, "main.pak");
