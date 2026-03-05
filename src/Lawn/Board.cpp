@@ -5857,7 +5857,7 @@ void Board::SetTutorialState(TutorialState theTutorialState)
 		DisplayAdvice("[ADVICE_CLICK_SHOVEL]", MessageStyle::MESSAGE_STYLE_HINT_STAY, AdviceType::ADVICE_NONE);
 		Rect aShovelButtonRect = GetShovelButtonRect();
 		int aPosX = aShovelButtonRect.mX + aShovelButtonRect.mWidth / 2 - 25;
-		int aPosY = aShovelButtonRect.mY + aShovelButtonRect.mHeight - 65;
+		int aPosY = aShovelButtonRect.mY + aShovelButtonRect.mHeight - 80;
 		TutorialArrowShow(aPosX, aPosY);
 		break;
 	}
