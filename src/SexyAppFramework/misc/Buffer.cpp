@@ -123,6 +123,71 @@ std::string Buffer::ToWebString() const
 	return aString;
 }
 
+// Windows-1252 bytes 0x80-0x9F to Unicode codepoints (SDL_iconv mishandles this under Wine)
+static constexpr char32_t gWin1252ToUnicode[32] = {
+	0x20AC, 0x0081, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
+	0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x008D, 0x017D, 0x008F,
+	0x0090, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
+	0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x009D, 0x017E, 0x0178
+};
+
+static std::string Win1252ToUTF8(const char* theData, int theLen)
+{
+	std::string aResult;
+	aResult.reserve(theLen);
+	for (int i = 0; i < theLen; ++i)
+	{
+		auto aByte = static_cast<unsigned char>(theData[i]);
+		char32_t aCodepoint;
+		if (aByte < 0x80)
+			aCodepoint = aByte;
+		else if (aByte <= 0x9F)
+			aCodepoint = gWin1252ToUnicode[aByte - 0x80];
+		else
+			aCodepoint = aByte; // 0xA0-0xFF map directly to U+00A0-U+00FF
+
+		if (aCodepoint < 0x80)
+			aResult += static_cast<char>(aCodepoint);
+		else if (aCodepoint < 0x0800) {
+			aResult += static_cast<char>(0xC0 | (aCodepoint >> 6));
+			aResult += static_cast<char>(0x80 | (aCodepoint & 0x3F));
+		} else {
+			aResult += static_cast<char>(0xE0 | (aCodepoint >> 12));
+			aResult += static_cast<char>(0x80 | ((aCodepoint >> 6) & 0x3F));
+			aResult += static_cast<char>(0x80 | (aCodepoint & 0x3F));
+		}
+	}
+	return aResult;
+}
+
+static bool IsValidUTF8(const char* theData, int theLen)
+{
+	auto p = reinterpret_cast<const unsigned char*>(theData);
+	auto anEnd = p + theLen;
+	while (p < anEnd)
+	{
+		unsigned char aFirst = *p;
+		int aSeqLen;
+		if (aFirst < 0x80) { ++p; continue; }
+		else if ((aFirst & 0xE0) == 0xC0 && aFirst >= 0xC2) aSeqLen = 2;
+		else if ((aFirst & 0xF0) == 0xE0) aSeqLen = 3;
+		else if ((aFirst & 0xF8) == 0xF0 && aFirst <= 0xF4) aSeqLen = 4;
+		else return false;
+
+		if (p + aSeqLen > anEnd) return false;
+		for (int i = 1; i < aSeqLen; ++i)
+			if ((p[i] & 0xC0) != 0x80) return false;
+
+		// Reject overlong encodings and surrogates
+		if (aSeqLen == 3 && aFirst == 0xE0 && p[1] < 0xA0) return false;
+		if (aSeqLen == 3 && aFirst == 0xED && p[1] > 0x9F) return false;
+		if (aSeqLen == 4 && aFirst == 0xF0 && p[1] < 0x90) return false;
+		if (aSeqLen == 4 && aFirst == 0xF4 && p[1] > 0x8F) return false;
+		p += aSeqLen;
+	}
+	return true;
+}
+
 bool Buffer::ToUTF8String(std::string* theString) const
 {
 	const char* aData = (const char*)GetDataPtr();
@@ -141,8 +206,11 @@ bool Buffer::ToUTF8String(std::string* theString) const
 	} else if (aLen >= 2 && memcmp(aData, "\xFE\xFF", 2) == 0) {
 		if ((aLen - 2) % 2 != 0) return false;
 		aStringBuffer = SDL_iconv_string("UTF-8", "UTF-16BE", aData + 2, aLen - 2);
+	} else if (IsValidUTF8(aData, aLen)) {
+		*theString = std::string(aData, aLen);
+		return true;
 	} else {
-		*theString = std::string(aData, aLen); // No BOM: treat as UTF-8 (covers ASCII as well)
+		*theString = Win1252ToUTF8(aData, aLen);
 		return true;
 	}
 
