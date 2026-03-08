@@ -96,7 +96,9 @@ void SexyApp::InitPropertiesHook()
 	LoadProperties("properties/partner.xml", false, checkSig);
 
 	mProdName = GetString("ProdName", mProdName);
+#if !defined(__IPHONEOS__) && (!defined(__ANDROID__) || defined(__TERMUX__)) && !defined(__SWITCH__) && !defined(__3DS__)
 	mIsWindowed = GetBoolean("DefaultWindowed", mIsWindowed);	
+#endif
 
 	std::string aNewTitle = GetString("Title", "");
 	if (aNewTitle.length() > 0)
