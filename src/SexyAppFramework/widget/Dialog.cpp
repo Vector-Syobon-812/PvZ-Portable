@@ -27,6 +27,9 @@
 #include "DialogButton.h"
 #include "SexyAppBase.h"
 #include "WidgetManager.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 //#include "graphics/SysFont.h"
 #include "graphics/ImageFont.h"
 #include "../../Resources.h" // bad
@@ -400,7 +403,16 @@ int Dialog::WaitForResult(bool autoKill)
 {	
 	//gSexyAppBase->DoMainLoop(mId);	
 
+#ifdef __EMSCRIPTEN__
+	while ((mWidgetManager != nullptr) && (mResult == 0x7FFFFFFF))
+	{
+		if (!gSexyAppBase->UpdateAppStep(nullptr))
+			break;
+		emscripten_sleep(0);
+	}
+#else
 	while ((gSexyAppBase->UpdateAppStep(nullptr)) && (mWidgetManager != nullptr) && (mResult == 0x7FFFFFFF));
+#endif
 
 	if (autoKill)
 		gSexyAppBase->KillDialog(mId);
