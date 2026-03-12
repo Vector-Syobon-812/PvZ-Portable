@@ -26,6 +26,7 @@
 #include <vector>
 #include <string>
 #include <stdint.h>
+#include <time.h>
 
 #define ZEN_MAX_GRIDSIZE_X 8
 #define ZEN_MAX_GRIDSIZE_Y 4
@@ -60,6 +61,8 @@ public:
     Board*                  mBoard;         //+0x4
     GardenType              mGardenType;    //+0x8
 	std::vector<std::string> mLoadedResourceNames;
+    time_t                  mNowTime;       // cached per-frame
+    tm                      mNowTM;         // cached per-frame
 
 public:
     ZenGarden();

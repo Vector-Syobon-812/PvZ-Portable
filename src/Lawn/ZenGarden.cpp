@@ -104,6 +104,8 @@ ZenGarden::ZenGarden()
     mApp = (LawnApp*)gSexyAppBase;
     mBoard = nullptr;
     mGardenType = GardenType::GARDEN_MAIN;
+    mNowTime = time(0);
+    mNowTM = *localtime(&mNowTime);
 }
 
 ZenGarden::~ZenGarden()
@@ -526,7 +528,7 @@ void ZenGarden::MouseDownWithMoneySign(Plant* thePlant)
 void ZenGarden::PlantFertilized(Plant* thePlant)
 {
     PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
-    aPottedPlant->mLastFertilizedTime = static_cast<int64_t>(time(0));
+    aPottedPlant->mLastFertilizedTime = static_cast<int64_t>(mNowTime);
     aPottedPlant->mPlantAge = static_cast<PottedPlantAge>(static_cast<int>(aPottedPlant->mPlantAge) + 1);
     aPottedPlant->mPlantNeed = PottedPlantNeed::PLANTNEED_NONE;
     aPottedPlant->mTimesFed = 0;
@@ -571,7 +573,7 @@ void ZenGarden::PlantFertilized(Plant* thePlant)
 void ZenGarden::PlantFulfillNeed(Plant* thePlant)
 {
     PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
-    aPottedPlant->mLastNeedFulfilledTime = static_cast<int64_t>(time(0));
+    aPottedPlant->mLastNeedFulfilledTime = static_cast<int64_t>(mNowTime);
     aPottedPlant->mPlantNeed = PottedPlantNeed::PLANTNEED_NONE;
     aPottedPlant->mTimesFed = 0;
 
@@ -650,7 +652,7 @@ void ZenGarden::PlantWatered(Plant* thePlant)
     {
         aTimeSpan = 9;
     }
-    aPottedPlant->mLastWateredTime = static_cast<int64_t>(time(0)) - aTimeSpan;
+    aPottedPlant->mLastWateredTime = static_cast<int64_t>(mNowTime) - aTimeSpan;
 
     mApp->PlayFoley(FoleyType::FOLEY_SPAWN_SUN);
     mBoard->AddCoin(thePlant->mX + 40, thePlant->mY, CoinType::COIN_SILVER, CoinMotion::COIN_MOTION_COIN);
@@ -773,33 +775,29 @@ void ZenGarden::RemoveHappyEffect(Plant* thePlant)
 //0x51E890
 bool ZenGarden::WasPlantNeedFulfilledToday(PottedPlant* thePottedPlant)
 {
-    time_t aNowTime = time(0);
-    int64_t aNow = static_cast<int64_t>(aNowTime);
+    int64_t aNow = static_cast<int64_t>(mNowTime);
     if (aNow - thePottedPlant->mLastNeedFulfilledTime < 3600)
     {
         return true;
     }
 
     time_t aLastNeedFulfilledTime = (time_t)thePottedPlant->mLastNeedFulfilledTime;
-    tm aNowTM = *localtime(&aNowTime);
     tm aLastNeedFulfilledTM = *localtime(&aLastNeedFulfilledTime);
-    return aNowTM.tm_year <= aLastNeedFulfilledTM.tm_year && aNowTM.tm_yday <= aLastNeedFulfilledTM.tm_yday;
+    return mNowTM.tm_year <= aLastNeedFulfilledTM.tm_year && mNowTM.tm_yday <= aLastNeedFulfilledTM.tm_yday;
 }
 
 //0x51E910
 bool ZenGarden::PlantShouldRefreshNeed(PottedPlant* thePottedPlant)
 {
-    time_t aNowTime = time(0);
-    int64_t aNow = static_cast<int64_t>(aNowTime);
+    int64_t aNow = static_cast<int64_t>(mNowTime);
     if (aNow - thePottedPlant->mLastWateredTime < 3600)
     {
         return false;
     }
     
     time_t aLastWateredTime = (time_t)thePottedPlant->mLastWateredTime;
-    tm aNowTM = *localtime(&aNowTime);
     tm aLastWateredTM = *localtime(&aLastWateredTime);
-    return aNowTM.tm_year > aLastWateredTM.tm_year || aNowTM.tm_yday > aLastWateredTM.tm_yday;
+    return mNowTM.tm_year > aLastWateredTM.tm_year || mNowTM.tm_yday > aLastWateredTM.tm_yday;
 }
 
 // GOTY @Patoke: 0x5292A0
@@ -812,7 +810,7 @@ void ZenGarden::RefreshPlantNeeds(PottedPlant* thePottedPlant)
 
     if (Plant::IsAquatic(thePottedPlant->mSeedType))
     {
-        thePottedPlant->mLastWateredTime = static_cast<int64_t>(time(0));
+        thePottedPlant->mLastWateredTime = static_cast<int64_t>(mNowTime);
         thePottedPlant->mPlantNeed = static_cast<PottedPlantNeed>(
             RandRangeInt(static_cast<int>(PottedPlantNeed::PLANTNEED_BUGSPRAY),
                 static_cast<int>(PottedPlantNeed::PLANTNEED_PHONOGRAPH)));
@@ -841,7 +839,7 @@ void ZenGarden::UpdatePlantNeeds()
 
 bool ZenGarden::WasPlantFertilizedInLastHour(PottedPlant* thePottedPlant)
 {
-    return static_cast<int64_t>(time(0)) - thePottedPlant->mLastFertilizedTime < 3600;
+    return static_cast<int64_t>(mNowTime) - thePottedPlant->mLastFertilizedTime < 3600;
 }
 
 //0x51EA30
@@ -858,7 +856,7 @@ PottedPlantNeed ZenGarden::GetPlantsNeed(PottedPlant* thePottedPlant)
         return PottedPlantNeed::PLANTNEED_NONE;
     }
 
-    int64_t aNow = static_cast<int64_t>(time(0));
+    int64_t aNow = static_cast<int64_t>(mNowTime);
     bool aTooLongSinceWatering = aNow - thePottedPlant->mLastWateredTime > 15;
     bool aTooShortSinceWatering = aNow - thePottedPlant->mLastWateredTime < 3;
 
@@ -937,7 +935,7 @@ void ZenGarden::MouseDownWithFeedingTool(int x, int y, CursorType theCursorType)
         {
             WakeStinky();
             mApp->AddTodParticle(aStinky->mPosX + 40.0f, aStinky->mPosY + 40.0f, aStinky->mRenderOrder + 1, ParticleEffect::PARTICLE_PRESENT_PICKUP);
-            mApp->mPlayerInfo->mLastStinkyChocolateTime = static_cast<uint32_t>(time(0));
+            mApp->mPlayerInfo->mLastStinkyChocolateTime = static_cast<uint32_t>(mNowTime);
             mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_CHOCOLATE]--;
 
             mApp->PlayFoley(FoleyType::FOLEY_WAKEUP);
@@ -1023,7 +1021,7 @@ void ZenGarden::MouseDownWithFeedingTool(int x, int y, CursorType theCursorType)
 void ZenGarden::FeedChocolateToPlant(Plant* thePlant)
 {
     PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
-    aPottedPlant->mLastChocolateTime = static_cast<int64_t>(time(0));
+    aPottedPlant->mLastChocolateTime = static_cast<int64_t>(mNowTime);
     thePlant->mLaunchCounter = 60;
     mApp->AddTodParticle(thePlant->mX + 40.0f, thePlant->mY + 40.0f, thePlant->mRenderOrder + 1, ParticleEffect::PARTICLE_PRESENT_PICKUP);
 }
@@ -1310,7 +1308,7 @@ void ZenGarden::AddStinky()
     if (!mApp->mPlayerInfo->mHasSeenStinky)
     {
         mApp->mPlayerInfo->mHasSeenStinky = 1;
-        uint32_t aTime = static_cast<uint32_t>(time(0));
+        uint32_t aTime = static_cast<uint32_t>(mNowTime);
         if (aTime == 0) aTime = 1;
         mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_STINKY_THE_SNAIL] = aTime;
     }
@@ -1774,6 +1772,10 @@ void ZenGarden::ZenGardenUpdate()
     {
         return;
     }
+
+    // Cache time(0) and localtime() once per frame to avoid repeated syscalls
+    mNowTime = time(0);
+    mNowTM = *localtime(&mNowTime);
 
     mApp->UpdateCrazyDave();
     if (mBoard->mCursorObject->mCursorType != CursorType::CURSOR_TYPE_NORMAL)
@@ -2270,7 +2272,7 @@ void ZenGarden::SetPlantAnimSpeed(Plant* thePlant)
 int ZenGarden::PlantGetMinutesSinceHappy(Plant* thePlant)
 {
     PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
-    int aMinutes = static_cast<int>((static_cast<int64_t>(time(0)) - aPottedPlant->mLastNeedFulfilledTime) / 60);
+    int aMinutes = static_cast<int>((static_cast<int64_t>(mNowTime) - aPottedPlant->mLastNeedFulfilledTime) / 60);
     if (PlantHighOnChocolate(aPottedPlant))
     {
         aMinutes = 0;
@@ -2317,7 +2319,7 @@ void ZenGarden::ResetPlantTimers(PottedPlant* thePottedPlant)
 void ZenGarden::PottedPlantUpdate(Plant* thePlant)
 {
     PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
-    int64_t aNow = static_cast<int64_t>(time(0));
+    int64_t aNow = static_cast<int64_t>(mNowTime);
     if (aPottedPlant->mLastWateredTime > aNow || 
         aPottedPlant->mLastNeedFulfilledTime > aNow || 
         aPottedPlant->mLastFertilizedTime > aNow || 
@@ -2383,7 +2385,7 @@ void ZenGarden::DrawPlantOverlay(Graphics* g, Plant* thePlant)
 //0x521FE0
 void ZenGarden::WakeStinky()
 {
-    uint32_t aTime = static_cast<uint32_t>(time(0));
+    uint32_t aTime = static_cast<uint32_t>(mNowTime);
     if (aTime == 0) aTime = 1;
     mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_STINKY_THE_SNAIL] = aTime;
     mApp->PlaySample(SOUND_TAP);
@@ -2395,12 +2397,12 @@ void ZenGarden::WakeStinky()
 bool ZenGarden::IsStinkyHighOnChocolate()
 {
     // Unsigned arithmetic extends limit to 2106 and handles wrap-around correctly so that after 2106 is also OK.
-    return static_cast<uint32_t>(time(0)) - mApp->mPlayerInfo->mLastStinkyChocolateTime < 3600;
+    return static_cast<uint32_t>(mNowTime) - mApp->mPlayerInfo->mLastStinkyChocolateTime < 3600;
 }
 
 bool ZenGarden::PlantHighOnChocolate(PottedPlant* thePottedPlant)
 {
-    return static_cast<int64_t>(time(0)) - thePottedPlant->mLastChocolateTime < 300;
+    return static_cast<int64_t>(mNowTime) - thePottedPlant->mLastChocolateTime < 300;
 }
 
 bool ZenGarden::IsStinkySleeping()
@@ -2417,7 +2419,7 @@ bool ZenGarden::ShouldStinkyBeAwake()
         return true;
     }
     // Unsigned arithmetic extends limit to 2106 and handles wrap-around correctly.
-    return static_cast<uint32_t>(time(0)) -
+    return static_cast<uint32_t>(mNowTime) -
         static_cast<uint32_t>(mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_STINKY_THE_SNAIL]) < 180;
 }
 
