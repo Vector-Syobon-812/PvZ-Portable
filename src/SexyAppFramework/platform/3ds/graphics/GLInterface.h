@@ -107,7 +107,7 @@ struct VertexList
 	~VertexList()
 	{
 		if (mVerts != mStackVerts)
-			delete mVerts;
+			delete[] mVerts;
 	}
 
 	void reserve(int theCapacity)
@@ -118,7 +118,7 @@ struct VertexList
 			GLVertex* aNewList = new GLVertex[theCapacity];
 			memcpy(aNewList, mVerts, mSize * sizeof(mVerts[0]));
 			if (mVerts != mStackVerts)
-				delete mVerts;
+				delete[] mVerts;
 
 			mVerts = aNewList;
 		}

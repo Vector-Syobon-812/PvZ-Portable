@@ -81,7 +81,7 @@ static bool gTextureSizeMustBePow2;
 static int MAX_TEXTURE_SIZE;
 static bool gLinearFilter = false;
 
-static GLVertex* gVertices;
+static std::vector<GLVertex> gVertices;
 static int gNumVertices;
 static GLenum gVertexMode;
 static GLuint gProgram;
@@ -98,77 +98,78 @@ static void GfxEnd()
 {
 	if (gVertexMode == (GLenum)-1) return;
 
-	glBindBuffer(GL_ARRAY_BUFFER, gVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLVertex) * gNumVertices, gVertices, GL_DYNAMIC_DRAW);
+	if (gNumVertices > 0)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, gVbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLVertex) * gNumVertices, gVertices.data(), GL_DYNAMIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT,         GL_FALSE, sizeof(GLVertex), (const void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE,  GL_TRUE,  sizeof(GLVertex), (const void*)(sizeof(float)*3));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT,         GL_FALSE, sizeof(GLVertex), (const void*)(sizeof(float)*3 + sizeof(uint32_t)));
-	glEnableVertexAttribArray(2);
+		glVertexAttribPointer(0, 3, GL_FLOAT,         GL_FALSE, sizeof(GLVertex), (const void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE,  GL_TRUE,  sizeof(GLVertex), (const void*)(sizeof(float)*3));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT,         GL_FALSE, sizeof(GLVertex), (const void*)(sizeof(float)*3 + sizeof(uint32_t)));
+		glEnableVertexAttribArray(2);
 
-	glDrawArrays(gVertexMode, 0, gNumVertices);
+		glDrawArrays(gVertexMode, 0, gNumVertices);
+	}
 
 	gVertexMode = (GLenum)-1;
 	gNumVertices = 0;
+	gVertices.clear();
+}
+
+static void GfxFlushIfOverBudget()
+{
+	if (gVertexMode == (GLenum)-1 || gNumVertices < MAX_VERTICES) return;
+	GLenum oldMode = gVertexMode;
+	GfxEnd();
+	GfxBegin(oldMode);
 }
 
 static void GfxAddVertices(const GLVertex *arr, int arrCount)
 {
 	if (gVertexMode == (GLenum)-1) return;
+	if (arrCount <= 0) return;
 
-	if (gNumVertices + arrCount >= MAX_VERTICES)
-	{
-		GLenum oldMode = gVertexMode;
-		GfxEnd();
-		GfxBegin(oldMode);
-	}
-
-	memcpy(gVertices + gNumVertices, arr, sizeof(GLVertex) * arrCount);
+	const int oldCount = gNumVertices;
 	gNumVertices += arrCount;
+	gVertices.resize(gNumVertices);
+	memcpy(gVertices.data() + oldCount, arr, sizeof(GLVertex) * arrCount);
+
+	GfxFlushIfOverBudget();
 }
 
 static void GfxAddVertices(VertexList &arr)
 {
-	if (gVertexMode == (GLenum)-1) return;
-
-	if (gNumVertices + arr.size() >= MAX_VERTICES)
-	{
-		GLenum oldMode = gVertexMode;
-		GfxEnd();
-		GfxBegin(oldMode);
-	}
-
-	memcpy(gVertices + gNumVertices, arr.mVerts, sizeof(GLVertex) * arr.size());
-	gNumVertices += arr.size();
+	GfxAddVertices(arr.mVerts, (int)arr.size());
 }
 
 static void GfxAddVertices(const TriVertex arr[][3], int arrCount, unsigned int theColor,
                            float tx, float ty, float aMaxTotalU, float aMaxTotalV)
 {
 	if (gVertexMode == (GLenum)-1) return;
+	if (arrCount <= 0) return;
 
-	if (gNumVertices + arrCount * 3 >= MAX_VERTICES)
-	{
-		GLenum oldMode = gVertexMode;
-		GfxEnd();
-		GfxBegin(oldMode);
-	}
+	const int oldCount = gNumVertices;
+	gNumVertices += arrCount * 3;
+	gVertices.resize(gNumVertices);
 
+	GLVertex* dst = gVertices.data() + oldCount;
 	for (int tri = 0; tri < arrCount; tri++)
 	{
-		TriVertex* v = (TriVertex*)arr[tri];
+		const TriVertex* v = arr[tri];
 		for (int i = 0; i < 3; i++)
 		{
-			gVertices[gNumVertices + i].sx    = v[i].x + tx;
-			gVertices[gNumVertices + i].sy    = v[i].y + ty;
-			gVertices[gNumVertices + i].color = GetColorFromTriVertex(v[i], theColor);
-			gVertices[gNumVertices + i].tu    = v[i].u * aMaxTotalU;
-			gVertices[gNumVertices + i].tv    = v[i].v * aMaxTotalV;
+			dst[i].sx    = v[i].x + tx;
+			dst[i].sy    = v[i].y + ty;
+			dst[i].color = GetColorFromTriVertex(v[i], theColor);
+			dst[i].tu    = v[i].u * aMaxTotalU;
+			dst[i].tv    = v[i].v * aMaxTotalV;
 		}
-		gNumVertices += 3;
+		dst += 3;
 	}
+
+	GfxFlushIfOverBudget();
 }
 
 // Unified GLSL body; VERT_IN / V2F / FRAG_OUT / TEX2D macros from GLPlatform.h.
@@ -311,14 +312,15 @@ static void CopyImageToTexture8888(MemoryImage *img, int offx, int offy,
 
 	if (padB)
 	{
-		uint32_t *row = dst + pitch * h;
-		memcpy(row, row - pitch * 4, pitch * 4);
+		uint32_t *lastRow = dst + pitch * (h - 1);
+		for (int y = h; y < dstH; y++)
+			memcpy(dst + pitch * y, lastRow, pitch * sizeof(uint32_t));
 	}
 
 	if (create)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pitch, dstH, 0, GL_RGBA, GL_UNSIGNED_BYTE, dst);
 	else
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, pitch, dstH, GL_RGBA, GL_UNSIGNED_BYTE, dst);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pitch, dstH, GL_RGBA, GL_UNSIGNED_BYTE, dst);
 	delete[] dst;
 }
 
@@ -365,14 +367,15 @@ static void CopyImageToTexture4444(MemoryImage *img, int offx, int offy,
 
 	if (padB)
 	{
-		uint16_t *row = dst + pitch * h;
-		memcpy(row, row - pitch * 2, pitch * 2);
+		uint16_t *lastRow = dst + pitch * (h - 1);
+		for (int y = h; y < dstH; y++)
+			memcpy(dst + pitch * y, lastRow, pitch * sizeof(uint16_t));
 	}
 
 	if (create)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pitch, dstH, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, dst);
 	else
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, pitch, dstH, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, dst);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pitch, dstH, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, dst);
 	delete[] dst;
 }
 
@@ -418,14 +421,15 @@ static void CopyImageToTexture565(MemoryImage *img, int offx, int offy,
 
 	if (padB)
 	{
-		uint16_t *row = dst + pitch * h;
-		memcpy(row, row - pitch * 2, pitch * 2);
+		uint16_t *lastRow = dst + pitch * (h - 1);
+		for (int y = h; y < dstH; y++)
+			memcpy(dst + pitch * y, lastRow, pitch * sizeof(uint16_t));
 	}
 
 	if (create)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, pitch, dstH, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, dst);
 	else
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, pitch, dstH, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, dst);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pitch, dstH, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, dst);
 	delete[] dst;
 }
 
@@ -449,14 +453,15 @@ static void CopyImageToTexturePalette8(MemoryImage *img, int offx, int offy,
 
 	if (padB)
 	{
-		uint32_t *row = dst + pitch * h;
-		memcpy(row, row - pitch * 4, pitch * 4);
+		uint32_t *lastRow = dst + pitch * (h - 1);
+		for (int y = h; y < dstH; y++)
+			memcpy(dst + pitch * y, lastRow, pitch * sizeof(uint32_t));
 	}
 
 	if (create)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pitch, dstH, 0, GL_RGBA, GL_UNSIGNED_BYTE, dst);
 	else
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, pitch, dstH, GL_RGBA, GL_UNSIGNED_BYTE, dst);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pitch, dstH, GL_RGBA, GL_UNSIGNED_BYTE, dst);
 	delete[] dst;
 }
 
@@ -1064,7 +1069,8 @@ GLInterface::GLInterface(SexyAppBase* theApp)
 
 	gVertexMode  = (GLenum)-1;
 	gNumVertices = 0;
-	gVertices = new GLVertex[MAX_VERTICES]();
+	gVertices.clear();
+	gVertices.reserve(MAX_VERTICES);
 }
 
 GLInterface::~GLInterface()
@@ -1075,7 +1081,6 @@ GLInterface::~GLInterface()
 		delete (TextureData*)img->mRenderData;
 		img->mRenderData = nullptr;
 	}
-	delete[] gVertices;
 }
 
 void GLInterface::SetDrawMode(int theDrawMode)

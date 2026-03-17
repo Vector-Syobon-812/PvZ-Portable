@@ -544,6 +544,9 @@ void TodTriangleGroup::AddTriangle(Graphics* g, Image* theImage, const SexyMatri
 			int vCount = Tod_clipShape(clipped, aTriRef[i], clipX0, clipX1, clipY0, clipY1);
 			for (int j = 0; j < vCount - 2; j++)
 			{
+				if (mTriangleCount == MAX_TRIANGLES)
+					DrawGroup(g);
+
 				TriVertex* pVert = mVertArray[mTriangleCount];
 				pVert[0].x = clipped[0]->x;
 				pVert[0].y = clipped[0]->y;
