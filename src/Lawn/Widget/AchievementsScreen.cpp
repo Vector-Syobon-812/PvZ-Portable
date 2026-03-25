@@ -183,6 +183,8 @@ void AchievementsWidget::Draw(Graphics* g) {
 
 // GOTY @Patoke: 0x4019D0
 void AchievementsWidget::KeyDown(KeyCode theKey) {
+	if(mApp->mGameSelector->mSlideCounter > 0)
+		return;
 	if (theKey == KEYCODE_UP) {
 		mScrollValue = mDefaultScrollValue;
 		mScrollDirection = 1;
@@ -205,6 +207,8 @@ void AchievementsWidget::MouseDown(int x, int y, int theClickCount) {
 
 // GOTY @Patoke: 0x401890
 void AchievementsWidget::MouseUp(int x, int y, int theClickCount) {
+	if(mApp->mGameSelector->mSlideCounter > 0)
+		return;
 	(void)theClickCount;
 	Point aPos = Point(x, y);
 	if (aBackButtonRect.Contains(aPos)) {
@@ -221,6 +225,8 @@ void AchievementsWidget::MouseUp(int x, int y, int theClickCount) {
 
 // GOTY @Patoke: 0x4019A0
 void AchievementsWidget::MouseWheel(int theDelta) {
+	if(mApp->mGameSelector->mSlideCounter > 0)
+		return;
 	mScrollValue = mDefaultScrollValue;
 
 	if (theDelta > 0)

@@ -1311,6 +1311,8 @@ bool GameSelector::ShouldDoZenTuturialBeforeAdventure()
 // GOTY @Patoke: 0x44F5C0
 void GameSelector::ButtonDepress(int theId)
 {
+	if(mSlideCounter > 0)
+		return;
 	if (theId == GameSelector::GameSelector_Minigame && mMinigamesLocked)
 	{
 		mApp->LawnMessageBox(Dialogs::DIALOG_MESSAGE, "[MODE_LOCKED]", "[MINIGAME_LOCKED_MESSAGE]", "[DIALOG_BUTTON_OK]", "", Dialog::BUTTONS_FOOTER);
