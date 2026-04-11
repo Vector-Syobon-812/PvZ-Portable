@@ -637,7 +637,7 @@ void Music::StartGameMusic()
 		StopAllMusic();
 	else if (mApp->IsScaryPotterLevel() || mApp->IsIZombieLevel())
 		MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_PUZZLE_CEREBRAWL);
-	else if (mApp->mBoard->StageHasFog())
+	else if (mApp->mBoard->StageIsNight() && mApp->mBoard->StageHasPool())
 		MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_FOG_RIGORMORMIST);
 	else if (mApp->mBoard->StageIsNight())
 		MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_NIGHT_MOONGRAINS);
