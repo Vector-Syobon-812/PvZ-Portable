@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <vector>
 
 #define REGEMU_VERSION 1
 
@@ -118,38 +119,32 @@ void regemu::SetRegFile(const std::string& fileName)
 	for (uint32_t i=0; i<aNumKeys; i++)
 	{
 		uint32_t aKeyNameLen;
-		char* aKeyName;
-
 		if (!f.read(reinterpret_cast<char*>(&aKeyNameLen), sizeof(uint32_t))) { return; }
-		aKeyName = new char[aKeyNameLen];
-		if (!f.read(aKeyName, aKeyNameLen)) { delete[] aKeyName; return; }
 
-		registry[aKeyName] = {};
+		std::vector<char> aKeyName(aKeyNameLen);
+		if (!f.read(aKeyName.data(), aKeyNameLen)) { return; }
+
+		registry[aKeyName.data()] = {};
 
 		uint32_t aNumValues;
-		if (!f.read(reinterpret_cast<char*>(&aNumValues), sizeof(uint32_t))) { delete[] aKeyName; return; }
+		if (!f.read(reinterpret_cast<char*>(&aNumValues), sizeof(uint32_t))) { return; }
 
 		for (uint32_t j=0; j<aNumValues; j++)
 		{
 			RegValue value;
 			uint32_t aValueNameLen;
-			char* aValueName;
+			if (!f.read(reinterpret_cast<char*>(&aValueNameLen), sizeof(uint32_t))) { return; }
 
-			if (!f.read(reinterpret_cast<char*>(&aValueNameLen), sizeof(uint32_t))) { delete[] aKeyName; return; }
-			aValueName = new char[aValueNameLen];
-			if (!f.read(aValueName, aValueNameLen)) { delete[] aKeyName; delete[] aValueName; return; }
+			std::vector<char> aValueName(aValueNameLen);
+			if (!f.read(aValueName.data(), aValueNameLen)) { return; }
 
-			if (!f.read(reinterpret_cast<char*>(&value.mType), sizeof(uint32_t))) { delete[] aKeyName; delete[] aValueName; return; }
-			if (!f.read(reinterpret_cast<char*>(&value.mLength), sizeof(uint32_t))) { delete[] aKeyName; delete[] aValueName; return; }
+			if (!f.read(reinterpret_cast<char*>(&value.mType), sizeof(uint32_t))) { return; }
+			if (!f.read(reinterpret_cast<char*>(&value.mLength), sizeof(uint32_t))) { return; }
 			value.mValue = new uint8_t[value.mLength];
-			if (!f.read(reinterpret_cast<char*>(value.mValue), value.mLength)) { delete[] aKeyName; delete[] aValueName; delete[] value.mValue; return; }
+			if (!f.read(reinterpret_cast<char*>(value.mValue), value.mLength)) { delete[] value.mValue; return; }
 
-			registry[aKeyName][aValueName] = value;
-
-			delete[] aValueName;
+			registry[aKeyName.data()][aValueName.data()] = value;
 		}
-
-		delete[] aKeyName;
 	}
 
 	Sexy::PrintF("RegEmu: Loaded from '%s': %zu total key(s)\n", currFile.c_str(), static_cast<size_t>(registry.size()));
