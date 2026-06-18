@@ -702,11 +702,13 @@ void TodParticleEmitter::UpdateSpawning()
 
 void TodParticleEmitter::DeleteNonCrossFading()
 {
-	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
+	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; )
 	{
+		TodListNode<ParticleID>* aNext = aNode->mNext;
 		TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (aParticle->mCrossFadeDuration <= 0)  // 当粒子不处于交叉混合状态，则删除该粒子
 			DeleteParticle(aParticle);
+		aNode = aNext;
 	}
 }
 
@@ -817,11 +819,13 @@ void TodParticleEmitter::Update()
 	mSystemTimeValue = mSystemAge / static_cast<float>(mSystemDuration - 1);
 	for (int i = 0; i < mEmitterDef->mSystemFields.count; i++)
 		UpdateSystemField(&mEmitterDef->mSystemFields.Fields[i], mSystemTimeValue, i);  // 更新发射器受到每个系统场的作用
-	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
+	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; )
 	{
+		TodListNode<ParticleID>* aNext = aNode->mNext;
 		TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (!UpdateParticle(aParticle))  // 更新发射器中的每个粒子
 			DeleteParticle(aParticle);
+		aNode = aNext;
 	}
 	UpdateSpawning();  // 更新粒子发射
 

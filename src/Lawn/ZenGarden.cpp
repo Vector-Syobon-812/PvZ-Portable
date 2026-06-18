@@ -496,7 +496,7 @@ void ZenGarden::MouseDownWithMoneySign(Plant* thePlant)
         int aNumPlantsAfterThis = mApp->mPlayerInfo->mNumPottedPlants - thePlant->mPottedPlantIndex - 1;
         if (aNumPlantsAfterThis > 0)
         {
-            memcpy(aPottedPlant, aPottedPlant + 1, aNumPlantsAfterThis * sizeof(PottedPlant));
+            memmove(aPottedPlant, aPottedPlant + 1, aNumPlantsAfterThis * sizeof(PottedPlant));
 
             Plant* aUpdatePlant = nullptr;
             while (mBoard->IteratePlants(aUpdatePlant))
