@@ -175,7 +175,7 @@ public:
 
 public:
 	virtual void			GenerateActiveFontLayers();
-	virtual void			DrawStringEx(Graphics* g, int theX, int theY, const std::string& theString, const Color& theColor, RectList* theDrawnAreas, int* theWidth);
+	virtual void			DrawStringEx(Graphics* g, int theX, int theY, std::string_view theString, const Color& theColor, RectList* theDrawnAreas, int* theWidth);
 
 public:
 	ImageFont(SexyAppBase* theSexyApp, const std::string& theFontDescFileName);
@@ -190,8 +190,8 @@ public:
 	
 	int						CharWidth(char32_t theChar) override;
 	int						CharWidthKern(char32_t theChar, char32_t thePrevChar) override;
-	int						StringWidth(const std::string& theString) override;
-	void					DrawString(Graphics* g, int theX, int theY, const std::string& theString, const Color& theColor, const Rect& theClipRect) override;
+	int						StringWidth(std::string_view theString) override;
+	void					DrawString(Graphics* g, int theX, int theY, std::string_view theString, const Color& theColor, const Rect& theClipRect) override;
 
 	_Font*					Duplicate() override;
 

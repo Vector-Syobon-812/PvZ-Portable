@@ -1384,7 +1384,7 @@ void ImageFont::GenerateActiveFontLayers()
 	}
 }
 
-int ImageFont::StringWidth(const std::string& theString)
+int ImageFont::StringWidth(std::string_view theString)
 {
 	int aWidth = 0;
 	char32_t aPrevChar = 0;
@@ -1469,7 +1469,7 @@ static RenderCommand gRenderCommandPool[POOL_SIZE];
 static RenderCommand* gRenderTail[256];
 static RenderCommand* gRenderHead[256];
 
-void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, const std::string& theString, const Color& theColor, RectList* theDrawnAreas, int* theWidth)
+void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, std::string_view theString, const Color& theColor, RectList* theDrawnAreas, int* theWidth)
 {
 	std::scoped_lock anAutoCrit(gRenderCritSec);
 
@@ -1655,7 +1655,7 @@ void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, const std::string&
 	g->SetColorizeImages(colorizeImages);
 }
 
-void ImageFont::DrawString(Graphics* g, int theX, int theY, const std::string& theString, const Color& theColor, const Rect& theClipRect)
+void ImageFont::DrawString(Graphics* g, int theX, int theY, std::string_view theString, const Color& theColor, const Rect& theClipRect)
 {
 	(void)theClipRect;
 	DrawStringEx(g, theX, theY, theString, theColor, nullptr, nullptr);

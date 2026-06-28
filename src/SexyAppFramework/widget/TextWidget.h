@@ -55,13 +55,13 @@ public:
 	virtual std::vector<std::string> GetLines();
 	virtual void SetLines(std::vector<std::string> theNewLines);
 	virtual void Clear();
-	virtual void DrawColorString(Graphics* g, const std::string& theString, int x, int y, bool useColors);
-	virtual void DrawColorStringHilited(Graphics* g, const std::string& theString, int x, int y, int theStartPos, int theEndPos);
-	virtual int GetStringIndex(const std::string& theString, int thePixel);
-	
-	virtual int GetColorStringWidth(const std::string& theString);
+	virtual void DrawColorString(Graphics* g, std::string_view theString, int x, int y, bool useColors);
+	virtual void DrawColorStringHilited(Graphics* g, std::string_view theString, int x, int y, int theStartPos, int theEndPos);
+	virtual int GetStringIndex(std::string_view theString, int thePixel);
+
+	virtual int GetColorStringWidth(std::string_view theString);
 	void         Resize(int theX, int theY, int theWidth, int theHeight) override;
-	virtual Color GetLastColor(const std::string& theString);
+	virtual Color GetLastColor(std::string_view theString);
 	virtual void AddToPhysicalLines(int theIdx, const std::string& theLine);
 	
 	virtual void AddLine(const std::string& theString);
